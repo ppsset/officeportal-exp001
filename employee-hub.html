@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Hub - WAG Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        .sidebar-collapsed { transform: translateX(-100%); }
+        .sidebar-expanded { transform: translateX(0); }
+        .tab-button.active { background-color: #F3F4F6; color: #1F2937; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .mobile-nav { bottom: 0; z-index: 50; }
+        .modal { backdrop-filter: blur(4px); }
+        .status-pending { background-color: #FEF3C7; color: #92400E; }
+        .status-approved { background-color: #D1FAE5; color: #065F46; }
+        .status-rejected { background-color: #FEE2E2; color: #991B1B; }
+        .status-in-progress { background-color: #DBEAFE; color: #1E40AF; }
+        .request-card { transition: all 0.3s ease; }
+        .request-card:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 overflow-x-hidden">
+    
+    <!-- Sidebar Navigation -->
+    <div id="sidebar" class="fixed left-0 top-0 h-full w-64 bg-white shadow-lg z-40 transition-transform duration-300 sidebar-expanded">
+        <div class="p-6 border-b border-gray-200">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-gray-700 to-gray-900 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-building text-white text-lg"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold text-gray-800">WAG Portal</h1>
+                        <p class="text-xs text-gray-500">MEP Design Office</p>
+                    </div>
+                </div>
+                <button id="sidebarToggle" class="lg:hidden text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+        </div>
+        
+        <nav class="p-4">
+            <ul class="space-y-2">
+                <li>
+                    <a href="index.html" class="flex items-center space-x-3 px-4 py-3 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+                        <i class="fas fa-tachometer-alt w-5"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="office-updates.html" class="flex items-center space-x-3 px-4 py-3 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+                        <i class="fas fa-newspaper w-5"></i>
+                        <span>Office Updates</span>
+                        <span class="ml-auto bg-orange-100 text-orange-600 text-xs px-2 py-1 rounded-full">3</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="employee-hub.html" class="flex items-center space-x-3 px-4 py-3 bg-gray-100 text-gray-800 rounded-lg font-medium">
+                        <i class="fas fa-users w-5"></i>
+                        <span>Employee Hub</span>
+                        <span class="ml-auto bg-blue-100 text-blue-600 text-xs px-2 py-1 rounded-full">5</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="program-calendar.html" class="flex items-center space-x-3 px-4 py-3 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+                        <i class="fas fa-calendar-alt w-5"></i>
+                        <span>Program Calendar</span>
+                        <span class="ml-auto bg-green-100 text-green-600 text-xs px-2 py-1 rounded-full">2</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="tech-knowledge.html" class="flex items-center space-x-3 px-4 py-3 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+                        <i class="fas fa-book w-5"></i>
+                        <span>Tech Knowledge</span>
+                        <span class="ml-auto bg-purple-100 text-purple-600 text-xs px-2 py-1 rounded-full">7</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="shared-facilities.html" class="flex items-center space-x-3 px-4 py-3 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+                        <i class="fas fa-building w-5"></i>
+                        <span>Shared Facilities</span>
+                        <span class="ml-auto bg-teal-100 text-teal-600 text-xs px-2 py-1 rounded-full">4</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="wellbeing.html" class="flex items-center space-x-3 px-4 py-3 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+                        <i class="fas fa-heartbeat w-5"></i>
+                        <span>Wellbeing</span>
+                        <span class="ml-auto bg-red-100 text-red-600 text-xs px-2 py-1 rounded-full">Good</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+        
+        <div class="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200">
+            <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                <div class="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
+                    <i class="fas fa-user text-gray-600 text-sm"></i>
+                </div>
+                <div class="flex-1">
+                    <p class="text-sm font-medium text-gray-800">John Smith</p>
+                    <p class="text-xs text-gray-500">Senior Engineer</p>
+                </div>
+                <button class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-cog"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Header -->
+    <div class="lg:hidden fixed top-0 left-0 right-0 bg-white shadow-sm z-30 p-4">
+        <div class="flex items-center justify-between">
+            <button id="mobileSidebarToggle" class="text-gray-600 hover:text-gray-800">
+                <i class="fas fa-bars text-xl"></i>
+            </button>
+            <div class="flex items-center space-x-2">
+                <div class="w-8 h-8 bg-gradient-to-br from-gray-700 to-gray-900 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-building text-white text-sm"></i>
+                </div>
+                <span class="font-bold text-gray-800">WAG Portal</span>
+            </div>
+            <div class="w-8"></div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div id="mainContent" class="lg:ml-64 min-h-screen">
+        <!-- Header -->
+        <div class="bg-white shadow-sm">
+            <div class="px-8 py-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-800">Employee Hub</h2>
+                        <p class="text-gray-600 mt-1">Manage leave requests, item requests, and defect reports</p>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <button class="relative p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors">
+                            <i class="fas fa-bell text-xl"></i>
+                            <span class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">5</span>
+                        </button>
+                        <button class="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors">
+                            <i class="fas fa-search text-xl"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabs and Controls -->
+        <div class="px-8 py-6">
+            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-6">
+                <!-- Tab Navigation -->
+                <div class="flex space-x-1 bg-gray-100 p-1 rounded-lg mb-4 lg:mb-0">
+                    <button class="tab-button active px-4 py-2 rounded-md text-sm font-medium transition-colors" data-tab="leave-requests">
+                        <i class="fas fa-calendar-times mr-2"></i>Leave Requests
+                    </button>
+                    <button class="tab-button px-4 py-2 rounded-md text-sm font-medium transition-colors" data-tab="item-requests">
+                        <i class="fas fa-box mr-2"></i>Item Requests
+                    </button>
+                    <button class="tab-button px-4 py-2 rounded-md text-sm font-medium transition-colors" data-tab="defect-reports">
+                        <i class="fas fa-exclamation-triangle mr-2"></i>Defect Reports
+                    </button>
+                </div>
+
+                <!-- Create Request Button -->
+                <button id="createRequestBtn" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">
+                    <i class="fas fa-plus mr-2"></i>Create Request
+                </button>
+            </div>
+
+            <!-- Content Container -->
+            <div class="space-y-6">
+                
+                <!-- Leave Requests Tab -->
+                <div id="leave-requests" class="tab-content active">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        
+                        <!-- Request Card 1 -->
+                        <div class="request-card bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                            <div class="flex items-start justify-between mb-4">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-user text-blue-600"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-semibold text-gray-800">Sarah Johnson</h3>
+                                        <p class="text-sm text-gray-500">Vacation Leave • Dec 25-29, 2024</p>
+                                    </div>
+                                </div>
+                                <span class="status-pending px-3 py-1 rounded-full text-xs font-medium">Pending</span>
+                            </div>
+                            <p class="text-gray-600 mb-4">Requesting 5 days of vacation leave during the holiday season to visit family out of state.</p>
+                            <div class="flex items-center justify-between text-sm text-gray-500">
+                                <span><i class="fas fa-clock mr-1"></i>Submitted 2 days ago</span>
+                                <div class="flex space-x-2">
+                                    <button class="text-green-600 hover:text-green-700">
+                                        <i class="fas fa-check mr-1"></i>Approve
+                                    </button>
+                                    <button class="text-red-600 hover:text-red-700">
+                                        <i class="fas fa-times mr-1"></i>Reject
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Request Card 2 -->
+                        <div class="request-card bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                            <div class="flex items-start justify-between mb-4">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-user text-green-600"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-semibold text-gray-800">Mike Chen</h3>
+                                        <p class="text-sm text-gray-500">Sick Leave • Dec 20, 2024</p>
+                                    </div>
+                                </div>
+                                <span class="status-approved px-3 py-1 rounded-full text-xs font-medium">Approved</span>
+                            </div>
+                            <p class="text-gray-600 mb-4">Single day sick leave due to flu symptoms. Medical certificate attached.</p>
+                            <div class="flex items-center justify-between text-sm text-gray-500">
+                                <span><i class="fas fa-clock mr-1"></i>Submitted 1 week ago</span>
+                                <span><i class="fas fa-check-circle mr-1"></i>Approved by Manager</span>
+                            </div>
+                        </div>
+
+                        <!-- Request Card 3 -->
+                        <div class="request-card bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                            <div class="flex items-start justify-between mb-4">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-user text-purple-600"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-semibold text-gray-800">Emily Rodriguez</h3>
+                                        <p class="text-sm text-gray-500">Personal Leave • Jan 5-8, 2025</p>
+                                    </div>
+                                </div>
+                                <span class="status-pending px-3 py-1 rounded-full text-xs font-medium">Pending</span>
+                            </div>
+                            <p class="text-gray-600 mb-4">Personal leave for family emergency. Need to travel out of country for 3 days.</p>
+                            <div class="flex items-center justify-between text-sm text-gray-500">
+                                <span><i class="fas fa-clock mr-1"></i>Submitted 3 hours ago</span>
+                                <div class="flex space-x-2">
+                                    <button class="text-green-600 hover:text-green-700">
+                                        <i class="fas fa-check mr-1"></i>Approve
+                                    </button>
+                                    <button class="text-red-600 hover:text-red-700">
+                                        <i class="fas fa-times mr-1"></i>Reject
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Request Card 4 -->
+                        <div class="request-card bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                            <div class="flex items-start justify-between mb-4">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-user text-orange-600"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-semibold text-gray-800">David Kim</h3>
+                                        <p class="text-sm text-gray-500">Maternity Leave • Feb 1 - May 1, 2025</p>
+                                    </div>
+                                </div>
+                                <span class="status-in-progress px-3 py-1 rounded-full text-xs font-medium">In Review</span>
+                            </div>
+                            <p class="text-gray-600 mb-4">Maternity leave request for 3 months. All necessary documentation provided.</p>
+                            <div class="flex items-center justify-between text-sm text-gray-500">
+                                <span><i class="fas fa-clock mr-1"></i>Submitted 1 day ago</span>
+                                <span><i class="fas fa-user-check mr-1"></i>With HR</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Item Requests Tab -->
+                <div id="item-requests" class="tab-content">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        
+                        <!-- Item Request Card 1 -->
+                        <div class="request-card bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                            <div class="flex items-start justify-between mb-4">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-10 h-10 bg-teal-100 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-laptop text-teal-600"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-semibold text-gray-800">Laptop Replacement</h3>
+                                        <p class="text-sm text-gray-500">Request by Alex Thompson</p>
+                                    </div>
+                                </div>
+                                <span class="status-pending px-3 py-1 rounded-full text-xs font-medium">Pending</span>
+                            </div>
+                            <p class="text-gray-600 mb-4">Current laptop is 5 years old and experiencing performance issues. Requesting upgrade to newer model for better productivity.</p>
+                            <div class="flex items-center justify-between text-sm text-gray-500 mb-3">
+                                <span><i class="fas fa-clock mr-1"></i>Submitted 1 day ago</span>
+                                <span><i class="fas fa-tag mr-1"></i>IT Equipment</span>
+                            </div>
+                            <div class="flex space-x-2">
+                                <button class="flex-1 bg-green-50 text-green-600 py-2 px-3 rounded-lg text-sm font-medium hover:bg-green-100 transition-colors">
+                                    <i class="fas fa-check mr-1"></i>Approve
+                                </button>
+                                <button class="flex-1 bg-red-50 text-red-600 py-2 px-3 rounded-lg text-sm font-medium hover:bg-red-100 transition-colors">
+                                    <i class="fas fa-times mr-1"></i>Reject
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Item Request Card 2 -->
+                        <div class="request-card bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                            <div class="flex items-start justify-between mb-4">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-chair text-indigo-600"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-semibold text-gray-800">Ergonomic Office Chair</h3>
+                                        <p class="text-sm text-gray-500">Request by Lisa Wang</p>
+                                    </div>
+                                </div>
+                                <span class="status-approved px-3 py-1 rounded-full text-xs font-medium">Approved</span>
+                            </div>
+                            <p class="text-gray-600 mb-4">Request for ergonomic office chair to improve posture and reduce back pain during long work hours.</p>
+                            <div class="flex items-center justify-between text-sm text-gray-500 mb-3">
+                                <span><i class="fas fa-clock mr-1"></i>Submitted 3 days ago</span>
+                                <span><i class="fas fa-tag mr-1"></i>Furniture</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm text-green-600">
+                                    <i class="fas fa-check-circle mr-1"></i>Approved - Order placed
+                                </span>
+                                <span class="text-sm text-gray-500">Delivery: Jan 15, 2025</span>
+                            </div>
+                        </div>
+
+                        <!-- Item Request Card 3 -->
+                        <div class="request-card bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                            <div class="flex items-start justify-between mb-4">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-book text-yellow-600"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-semibold text-gray-800">Technical Reference Books</h3>
+                                        <p class="text-sm text-gray-500">Request by Robert Johnson</p>
+                                    </div>
+                                </div>
+                                <span class="status-pending px-3 py-1 rounded-full text-xs font-medium">Pending</span>
+                            </div>
+                            <p class="text-gray-600 mb-4">Request for 3 technical reference books on HVAC system design and energy efficiency standards.</p>
+                            <div class="flex items-center justify-between text-sm text-gray-500 mb-3">
+                                <span><i class="fas fa-clock mr-1"></i>Submitted 5 hours ago</span>
+                                <span><i class="fas fa-tag mr-1"></i>Educational</span>
+                            </div>
+                            <div class="flex space-x-2">
+                                <button class="flex-1 bg-green-50 text-green-600 py-2 px-3 rounded-lg text-sm font-medium hover:bg-green-100 transition-colors">
+                                    <i class="fas fa-check mr-1"></i>Approve
+                                </button>
+                                <button class="flex-1 bg-red-50 text-red-600 py-2 px-3 rounded-lg text-sm font-medium hover:bg-red-100 transition-colors">
+                                    <i class="fas fa-times mr-1"></i>Reject
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Item Request Card 4 -->
+                        <div class="request-card bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                            <div class="flex items-start justify-between mb-4">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-tools text-red-600"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-semibold text-gray-800">3D Printer Filament</h3>
+                                        <p class="text-sm text-gray-500">Request by Mark Davis</p>
+                                    </div>
+                                </div>
+                                <span class="status-rejected px-3 py-1 rounded-full text-xs font-medium">Rejected</span>
+                            </div>
+                            <p class="text-gray-600 mb-4">Request for additional 3D printer filament for prototype development. Current stock is insufficient for upcoming projects.</p>
+                            <div class="flex items-center justify-between text-sm text-gray-500 mb-3">
+                                <span><i class="fas fa-clock mr-1"></i>Submitted 1 week ago</span>
+                                <span><i class="fas fa-tag mr-1"></i>Supplies</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm text-red-600">
+                                    <i class="fas fa-times-circle mr-1"></i>Budget constraints
+                                </span>
+                                <button class="text-sm text-blue-600 hover:text-blue-700">
+                                    <i class="fas fa-redo mr-1"></i>Resubmit
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Defect Reports Tab -->
+                <div id="defect-reports" class="tab-content">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        
+                        <!-- Defect Card 1 -->
+                        <div class="request-card bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                            <div class="flex items-start justify-between mb-4">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-exclamation-triangle text-red-600"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-semibold text-gray-800">HVAC System Malfunction</h3>
+                                        <p class="text-sm text-gray-500">Reported by Jennifer Lee</p>
+                                    </div>
+                                </div>
+                                <span class="status-in-progress px-3 py-1 rounded-full text-xs font-medium">In Progress</span>
+                            </div>
+                            <p class="text-gray-600 mb-4">HVAC unit on 3rd floor making unusual noise and not maintaining proper temperature. Affecting employee comfort and productivity.</p>
+                            <div class="flex items-center justify-between text-sm text-gray-500 mb-3">
+                                <span><i class="fas fa-clock mr-1"></i>Reported 2 hours ago</span>
+                                <span><i class="fas fa-map-marker-alt mr-1"></i>3rd Floor</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm text-blue-600">
+                                    <i class="fas fa-wrench mr-1"></i>Maintenance assigned
+                                </span>
+                                <button class="text-sm text-gray-600 hover:text-gray-700">
+                                    <i class="fas fa-comment mr-1"></i>Update
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Defect Card 2 -->
+                        <div class="request-card bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                            <div class="flex items-start justify-between mb-4">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-lightbulb text-yellow-600"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-semibold text-gray-800">Lighting Issue - Conference Room 2</h3>
+                                        <p class="text-sm text-gray-500">Reported by Tom Wilson</p>
+                                    </div>
+                                </div>
+                                <span class="status-pending px-3 py-1 rounded-full text-xs font-medium">Pending</span>
+                            </div>
+                            <p class="text-gray-600 mb-4">Two fluorescent lights not working in conference room 2. Need replacement before important client meeting tomorrow.</p>
+                            <div class="flex items-center justify-between text-sm text-gray-500 mb-3">
+                                <span><i class="fas fa-clock mr-1"></i>Reported 4 hours ago</span>
+                                <span><i class="fas fa-map-marker-alt mr-1"></i>Conference Room 2</span>
+                            </div>
+                            <div class="flex space-x-2">
+                                <button class="flex-1 bg-blue-50 text-blue-600 py-2 px-3 rounded-lg text-sm font-medium hover:bg-blue-100 transition-colors">
+                                    <i class="fas fa-user-plus mr-1"></i>Assign
+                                </button>
+                                <button class="flex-1 bg-gray-50 text-gray-600 py-2 px-3 rounded-lg text-sm font-medium hover:bg-gray-100 transition-colors">
+                                    <i class="fas fa-check mr-1"></i>Resolve
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Defect Card 3 -->
+                        <div class="request-card bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                            <div class="flex items-start justify-between mb-4">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-check-circle text-green-600"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-semibold text-gray-800">Printer Jam Issue</h3>
+                                        <p class="text-sm text-gray-500">Reported by Amanda Brown</p>
+                                    </div>
+                                </div>
+                                <span class="status-approved px-3 py-1 rounded-full text-xs font-medium">Resolved</span>
+                            </div>
+                            <p class="text-gray-600 mb-4">Color printer on 2nd floor constantly jamming. Toner replacement and maintenance completed.</p>
+                            <div class="flex items-center justify-between text-sm text-gray-500 mb-3">
+                                <span><i class="fas fa-clock mr-1"></i>Resolved 1 day ago</span>
+                                <span><i class="fas fa-map-marker-alt mr-1"></i>2nd Floor</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm text-green-600">
+                                    <i class="fas fa-check-circle mr-1"></i>Fixed by IT Support
+                                </span>
+                                <button class="text-sm text-blue-600 hover:text-blue-700">
+                                    <i class="fas fa-star mr-1"></i>Rate
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Defect Card 4 -->
+                        <div class="request-card bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                            <div class="flex items-start justify-between mb-4">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-tint text-red-600"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-semibold text-gray-800">Water Leak - Kitchen Area</h3>
+                                        <p class="text-sm text-gray-500">Reported by Chris Martinez</p>
+                                    </div>
+                                </div>
+                                <span class="status-in-progress px-3 py-1 rounded-full text-xs font-medium">In Progress</span>
+                            </div>
+                            <p class="text-gray-600 mb-4">Small water leak under kitchen sink. Water pooling on floor creating slip hazard. Immediate attention required.</p>
+                            <div class="flex items-center justify-between text-sm text-gray-500 mb-3">
+                                <span><i class="fas fa-clock mr-1"></i>Reported 30 minutes ago</span>
+                                <span><i class="fas fa-map-marker-alt mr-1"></i>Kitchen Area</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm text-orange-600">
+                                    <i class="fas fa-exclamation-triangle mr-1"></i>Urgent - Safety issue
+                                </span>
+                                <button class="text-sm text-blue-600 hover:text-blue-700">
+                                    <i class="fas fa-eye mr-1"></i>View Details
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Request Modal -->
+    <div id="createRequestModal" class="modal fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="modal-content bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-screen overflow-y-auto">
+            <div class="p-6 border-b border-gray-200">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-lg font-semibold text-gray-800">Create New Request</h3>
+                    <button id="closeRequestModal" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="p-6">
+                <form id="requestForm">
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Request Type</label>
+                        <select id="requestType" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                            <option value="">Select request type</option>
+                            <option value="leave">Leave Request</option>
+                            <option value="item">Item Request</option>
+                            <option value="defect">Defect Report</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Title</label>
+                        <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                        <textarea rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required></textarea>
+                    </div>
+                    
+                    <div class="mb-4" id="leaveFields" style="display: none;">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Start Date</label>
+                                <input type="date" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">End Date</label>
+                                <input type="date" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4" id="itemFields" style="display: none;">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Category</label>
+                                <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option>IT Equipment</option>
+                                    <option>Furniture</option>
+                                    <option>Supplies</option>
+                                    <option>Educational</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Priority</label>
+                                <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option>Low</option>
+                                    <option>Medium</option>
+                                    <option>High</option>
+                                    <option>Urgent</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4" id="defectFields" style="display: none;">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Location</label>
+                                <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g., 2nd Floor, Kitchen">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Priority</label>
+                                <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option>Low</option>
+                                    <option>Medium</option>
+                                    <option>High</option>
+                                    <option>Urgent</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Attachments (Optional)</label>
+                        <input type="file" multiple class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    
+                    <div class="flex justify-end space-x-3">
+                        <button type="button" id="cancelRequestBtn" class="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                            Cancel
+                        </button>
+                        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                            Submit Request
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Bottom Navigation -->
+    <div class="lg:hidden mobile-nav fixed left-0 right-0 bg-white border-t border-gray-200 px-4 py-2">
+        <div class="flex justify-around">
+            <a href="index.html" class="flex flex-col items-center py-2 text-gray-500">
+                <i class="fas fa-tachometer-alt text-lg"></i>
+                <span class="text-xs mt-1">Dashboard</span>
+            </a>
+            <a href="office-updates.html" class="flex flex-col items-center py-2 text-gray-500">
+                <i class="fas fa-newspaper text-lg"></i>
+                <span class="text-xs mt-1">Updates</span>
+            </a>
+            <a href="employee-hub.html" class="flex flex-col items-center py-2 text-gray-800">
+                <i class="fas fa-users text-lg"></i>
+                <span class="text-xs mt-1">Hub</span>
+            </a>
+            <a href="program-calendar.html" class="flex flex-col items-center py-2 text-gray-500">
+                <i class="fas fa-calendar text-lg"></i>
+                <span class="text-xs mt-1">Calendar</span>
+            </a>
+            <a href="wellbeing.html" class="flex flex-col items-center py-2 text-gray-500">
+                <i class="fas fa-heartbeat text-lg"></i>
+                <span class="text-xs mt-1">Wellbeing</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Add bottom padding for mobile navigation -->
+    <div class="lg:hidden h-20"></div>
+
+    <script src="main.js"></script>
+    <script>
+        // Employee Hub specific functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            // Tab switching
+            const tabButtons = document.querySelectorAll('.tab-button');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const targetTab = button.dataset.tab;
+                    
+                    // Update active tab
+                    tabButtons.forEach(btn => btn.classList.remove('active'));
+                    tabContents.forEach(content => content.classList.remove('active'));
+                    
+                    button.classList.add('active');
+                    document.getElementById(targetTab).classList.add('active');
+                    
+                    // Animate tab transition
+                    anime({
+                        targets: `#${targetTab}`,
+                        opacity: [0, 1],
+                        translateY: [20, 0],
+                        duration: 300,
+                        easing: 'easeOutQuart'
+                    });
+                });
+            });
+
+            // Modal functionality
+            const createRequestBtn = document.getElementById('createRequestBtn');
+            const createRequestModal = document.getElementById('createRequestModal');
+            const closeRequestModal = document.getElementById('closeRequestModal');
+            const cancelRequestBtn = document.getElementById('cancelRequestBtn');
+            const requestType = document.getElementById('requestType');
+            const leaveFields = document.getElementById('leaveFields');
+            const itemFields = document.getElementById('itemFields');
+            const defectFields = document.getElementById('defectFields');
+
+            createRequestBtn.addEventListener('click', () => {
+                createRequestModal.classList.remove('hidden');
+                createRequestModal.classList.add('flex');
+                
+                anime({
+                    targets: createRequestModal.querySelector('.modal-content'),
+                    scale: [0.8, 1],
+                    opacity: [0, 1],
+                    duration: 300,
+                    easing: 'easeOutBack'
+                });
+            });
+
+            [closeRequestModal, cancelRequestBtn].forEach(btn => {
+                btn.addEventListener('click', () => {
+                    anime({
+                        targets: createRequestModal.querySelector('.modal-content'),
+                        scale: [1, 0.8],
+                        opacity: [1, 0],
+                        duration: 200,
+                        easing: 'easeInQuart',
+                        complete: () => {
+                            createRequestModal.classList.add('hidden');
+                            createRequestModal.classList.remove('flex');
+                        }
+                    });
+                });
+            });
+
+            // Dynamic form fields based on request type
+            requestType.addEventListener('change', (e) => {
+                const value = e.target.value;
+                
+                // Hide all field groups
+                leaveFields.style.display = 'none';
+                itemFields.style.display = 'none';
+                defectFields.style.display = 'none';
+                
+                // Show relevant fields
+                switch(value) {
+                    case 'leave':
+                        leaveFields.style.display = 'block';
+                        break;
+                    case 'item':
+                        itemFields.style.display = 'block';
+                        break;
+                    case 'defect':
+                        defectFields.style.display = 'block';
+                        break;
+                }
+            });
+
+            // Form submission
+            const requestForm = document.getElementById('requestForm');
+            requestForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                
+                // Show success notification
+                if (window.wagPortal) {
+                    window.wagPortal.showNotification('Request submitted successfully!', 'success');
+                }
+                
+                // Close modal and reset form
+                createRequestModal.classList.add('hidden');
+                createRequestModal.classList.remove('flex');
+                requestForm.reset();
+                leaveFields.style.display = 'none';
+                itemFields.style.display = 'none';
+                defectFields.style.display = 'none';
+            });
+
+            // Request action buttons
+            document.querySelectorAll('.request-card button').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    
+                    const action = button.textContent.trim();
+                    const card = button.closest('.request-card');
+                    const title = card.querySelector('h3').textContent;
+                    
+                    // Animate button click
+                    anime({
+                        targets: button,
+                        scale: [1, 0.95, 1],
+                        duration: 200,
+                        easing: 'easeInOutQuad'
+                    });
+                    
+                    // Show appropriate notification
+                    if (action.includes('Approve')) {
+                        if (window.wagPortal) {
+                            window.wagPortal.showNotification(`${title} approved!`, 'success');
+                        }
+                        // Update status badge
+                        const statusBadge = card.querySelector('[class*="status-"]');
+                        statusBadge.className = 'status-approved px-3 py-1 rounded-full text-xs font-medium';
+                        statusBadge.textContent = 'Approved';
+                    } else if (action.includes('Reject')) {
+                        if (window.wagPortal) {
+                            window.wagPortal.showNotification(`${title} rejected.`, 'error');
+                        }
+                        // Update status badge
+                        const statusBadge = card.querySelector('[class*="status-"]');
+                        statusBadge.className = 'status-rejected px-3 py-1 rounded-full text-xs font-medium';
+                        statusBadge.textContent = 'Rejected';
+                    }
+                });
+            });
+
+            // Animate request cards on load
+            anime({
+                targets: '.request-card',
+                translateY: [30, 0],
+                opacity: [0, 1],
+                delay: anime.stagger(100),
+                duration: 600,
+                easing: 'easeOutQuart'
+            });
+        });
+    </script>
+</body>
+</html>

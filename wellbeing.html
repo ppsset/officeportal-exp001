@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wellbeing - WAG Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        .sidebar-collapsed { transform: translateX(-100%); }
+        .sidebar-expanded { transform: translateX(0); }
+        .tab-button.active { background-color: #F3F4F6; color: #1F2937; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .mobile-nav { bottom: 0; z-index: 50; }
+        .wellbeing-card { transition: all 0.3s ease; }
+        .wellbeing-card:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
+        .status-excellent { background-color: #D1FAE5; color: #065F46; }
+        .status-good { background-color: #DBEAFE; color: #1E40AF; }
+        .status-fair { background-color: #FEF3C7; color: #92400E; }
+        .status-poor { background-color: #FEE2E2; color: #991B1B; }
+        .metric-card { transition: all 0.3s ease; }
+        .metric-card:hover { transform: scale(1.02); }
+        .recommendation-card { border-left: 4px solid #3B82F6; }
+        .chart-container { min-height: 300px; }
+        .gauge-container { position: relative; }
+        .gauge-value { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 1.5rem; font-weight: bold; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 overflow-x-hidden">
+    
+    <!-- Sidebar Navigation -->
+    <div id="sidebar" class="fixed left-0 top-0 h-full w-64 bg-white shadow-lg z-40 transition-transform duration-300 sidebar-expanded">
+        <div class="p-6 border-b border-gray-200">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-gray-700 to-gray-900 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-building text-white text-lg"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold text-gray-800">WAG Portal</h1>
+                        <p class="text-xs text-gray-500">MEP Design Office</p>
+                    </div>
+                </div>
+                <button id="sidebarToggle" class="lg:hidden text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+        </div>
+        
+        <nav class="p-4">
+            <ul class="space-y-2">
+                <li>
+                    <a href="index.html" class="flex items-center space-x-3 px-4 py-3 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+                        <i class="fas fa-tachometer-alt w-5"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="office-updates.html" class="flex items-center space-x-3 px-4 py-3 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+                        <i class="fas fa-newspaper w-5"></i>
+                        <span>Office Updates</span>
+                        <span class="ml-auto bg-orange-100 text-orange-600 text-xs px-2 py-1 rounded-full">3</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="employee-hub.html" class="flex items-center space-x-3 px-4 py-3 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+                        <i class="fas fa-users w-5"></i>
+                        <span>Employee Hub</span>
+                        <span class="ml-auto bg-blue-100 text-blue-600 text-xs px-2 py-1 rounded-full">5</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="program-calendar.html" class="flex items-center space-x-3 px-4 py-3 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+                        <i class="fas fa-calendar-alt w-5"></i>
+                        <span>Program Calendar</span>
+                        <span class="ml-auto bg-green-100 text-green-600 text-xs px-2 py-1 rounded-full">2</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="tech-knowledge.html" class="flex items-center space-x-3 px-4 py-3 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+                        <i class="fas fa-book w-5"></i>
+                        <span>Tech Knowledge</span>
+                        <span class="ml-auto bg-purple-100 text-purple-600 text-xs px-2 py-1 rounded-full">7</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="shared-facilities.html" class="flex items-center space-x-3 px-4 py-3 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+                        <i class="fas fa-building w-5"></i>
+                        <span>Shared Facilities</span>
+                        <span class="ml-auto bg-teal-100 text-teal-600 text-xs px-2 py-1 rounded-full">4</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="wellbeing.html" class="flex items-center space-x-3 px-4 py-3 bg-gray-100 text-gray-800 rounded-lg font-medium">
+                        <i class="fas fa-heartbeat w-5"></i>
+                        <span>Wellbeing</span>
+                        <span class="ml-auto bg-green-100 text-green-600 text-xs px-2 py-1 rounded-full">Good</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+        
+        <div class="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200">
+            <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                <div class="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
+                    <i class="fas fa-user text-gray-600 text-sm"></i>
+                </div>
+                <div class="flex-1">
+                    <p class="text-sm font-medium text-gray-800">John Smith</p>
+                    <p class="text-xs text-gray-500">Senior Engineer</p>
+                </div>
+                <button class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-cog"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Header -->
+    <div class="lg:hidden fixed top-0 left-0 right-0 bg-white shadow-sm z-30 p-4">
+        <div class="flex items-center justify-between">
+            <button id="mobileSidebarToggle" class="text-gray-600 hover:text-gray-800">
+                <i class="fas fa-bars text-xl"></i>
+            </button>
+            <div class="flex items-center space-x-2">
+                <div class="w-8 h-8 bg-gradient-to-br from-gray-700 to-gray-900 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-building text-white text-sm"></i>
+                </div>
+                <span class="font-bold text-gray-800">WAG Portal</span>
+            </div>
+            <div class="w-8"></div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div id="mainContent" class="lg:ml-64 min-h-screen">
+        <!-- Header -->
+        <div class="bg-white shadow-sm">
+            <div class="px-8 py-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-800">Wellbeing</h2>
+                        <p class="text-gray-600 mt-1">Real-time environmental monitoring and health recommendations</p>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <button class="relative p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors">
+                            <i class="fas fa-bell text-xl"></i>
+                            <span class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">Good</span>
+                        </button>
+                        <button class="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors">
+                            <i class="fas fa-search text-xl"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Floor Tabs -->
+        <div class="px-8 py-6">
+            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-6">
+                <!-- Floor Navigation -->
+                <div class="flex space-x-1 bg-gray-100 p-1 rounded-lg mb-4 lg:mb-0">
+                    <button class="tab-button active px-4 py-2 rounded-md text-sm font-medium transition-colors" data-tab="floor-2">
+                        <i class="fas fa-layer-group mr-2"></i>2nd Floor
+                    </button>
+                    <button class="tab-button px-4 py-2 rounded-md text-sm font-medium transition-colors" data-tab="floor-3">
+                        <i class="fas fa-layer-group mr-2"></i>3rd Floor
+                    </button>
+                    <button class="tab-button px-4 py-2 rounded-md text-sm font-medium transition-colors" data-tab="floor-4">
+                        <i class="fas fa-layer-group mr-2"></i>4th Floor
+                    </button>
+                    <button class="tab-button px-4 py-2 rounded-md text-sm font-medium transition-colors" data-tab="floor-5">
+                        <i class="fas fa-layer-group mr-2"></i>5th Floor
+                    </button>
+                </div>
+
+                <!-- Last Updated -->
+                <div class="text-sm text-gray-500">
+                    <i class="fas fa-sync-alt mr-1"></i>Last updated: <span id="lastUpdated">2 minutes ago</span>
+                </div>
+            </div>
+
+            <!-- Content Container -->
+            <div class="space-y-6">
+                
+                <!-- 2nd Floor Tab -->
+                <div id="floor-2" class="tab-content active">
+                    <!-- Overall Wellbeing Score -->
+                    <div class="wellbeing-card bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-semibold text-gray-800">2nd Floor Environmental Status</h3>
+                            <span class="status-good px-3 py-1 rounded-full text-xs font-medium">Good</span>
+                        </div>
+                        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                            <div class="metric-card bg-green-50 rounded-lg p-4 text-center">
+                                <div class="gauge-container mx-auto w-16 h-16">
+                                    <canvas id="pm25Gauge-2" class="w-full h-full"></canvas>
+                                    <div class="gauge-value text-green-600">12</div>
+                                </div>
+                                <p class="text-sm font-medium text-gray-700 mt-2">PM2.5</p>
+                                <p class="text-xs text-gray-500">μg/m³</p>
+                            </div>
+                            <div class="metric-card bg-blue-50 rounded-lg p-4 text-center">
+                                <div class="gauge-container mx-auto w-16 h-16">
+                                    <canvas id="co2Gauge-2" class="w-full h-full"></canvas>
+                                    <div class="gauge-value text-blue-600">650</div>
+                                </div>
+                                <p class="text-sm font-medium text-gray-700 mt-2">CO₂</p>
+                                <p class="text-xs text-gray-500">ppm</p>
+                            </div>
+                            <div class="metric-card bg-yellow-50 rounded-lg p-4 text-center">
+                                <div class="gauge-container mx-auto w-16 h-16">
+                                    <canvas id="noiseGauge-2" class="w-full h-full"></canvas>
+                                    <div class="gauge-value text-yellow-600">42</div>
+                                </div>
+                                <p class="text-sm font-medium text-gray-700 mt-2">Noise</p>
+                                <p class="text-xs text-gray-500">dB</p>
+                            </div>
+                            <div class="metric-card bg-purple-50 rounded-lg p-4 text-center">
+                                <div class="gauge-container mx-auto w-16 h-16">
+                                    <canvas id="lightGauge-2" class="w-full h-full"></canvas>
+                                    <div class="gauge-value text-purple-600">520</div>
+                                </div>
+                                <p class="text-sm font-medium text-gray-700 mt-2">Light</p>
+                                <p class="text-xs text-gray-500">lux</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Detailed Metrics -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                        <!-- Air Quality Chart -->
+                        <div class="wellbeing-card bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4">Air Quality Trends</h3>
+                            <div id="airQualityChart-2" class="chart-container"></div>
+                        </div>
+
+                        <!-- Power Consumption -->
+                        <div class="wellbeing-card bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4">Power Consumption</h3>
+                            <div id="powerChart-2" class="chart-container"></div>
+                        </div>
+                    </div>
+
+                    <!-- Recommendations -->
+                    <div class="wellbeing-card bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">AI Health Recommendations</h3>
+                        <div class="space-y-4">
+                            <div class="recommendation-card bg-blue-50 p-4 rounded-lg">
+                                <div class="flex items-start space-x-3">
+                                    <i class="fas fa-lightbulb text-blue-600 mt-1"></i>
+                                    <div>
+                                        <h4 class="font-medium text-gray-800">Optimal Lighting</h4>
+                                        <p class="text-sm text-gray-600">Current lighting levels are excellent for productivity. Consider maintaining this level throughout the day.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="recommendation-card bg-green-50 p-4 rounded-lg">
+                                <div class="flex items-start space-x-3">
+                                    <i class="fas fa-wind text-green-600 mt-1"></i>
+                                    <div>
+                                        <h4 class="font-medium text-gray-800">Air Quality</h4>
+                                        <p class="text-sm text-gray-600">PM2.5 levels are within healthy range. HVAC system is performing optimally.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="recommendation-card bg-yellow-50 p-4 rounded-lg">
+                                <div class="flex items-start space-x-3">
+                                    <i class="fas fa-volume-down text-yellow-600 mt-1"></i>
+                                    <div>
+                                        <h4 class="font-medium text-gray-800">Noise Level</h4>
+                                        <p class="text-sm text-gray-600">Noise levels are acceptable but consider using noise-cancelling headphones for focused work.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3rd Floor Tab -->
+                <div id="floor-3" class="tab-content">
+                    <!-- Overall Wellbeing Score -->
+                    <div class="wellbeing-card bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-semibold text-gray-800">3rd Floor Environmental Status</h3>
+                            <span class="status-excellent px-3 py-1 rounded-full text-xs font-medium">Excellent</span>
+                        </div>
+                        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                            <div class="metric-card bg-green-50 rounded-lg p-4 text-center">
+                                <div class="gauge-container mx-auto w-16 h-16">
+                                    <canvas id="pm25Gauge-3" class="w-full h-full"></canvas>
+                                    <div class="gauge-value text-green-600">8</div>
+                                </div>
+                                <p class="text-sm font-medium text-gray-700 mt-2">PM2.5</p>
+                                <p class="text-xs text-gray-500">μg/m³</p>
+                            </div>
+                            <div class="metric-card bg-green-50 rounded-lg p-4 text-center">
+                                <div class="gauge-container mx-auto w-16 h-16">
+                                    <canvas id="co2Gauge-3" class="w-full h-full"></canvas>
+                                    <div class="gauge-value text-green-600">580</div>
+                                </div>
+                                <p class="text-sm font-medium text-gray-700 mt-2">CO₂</p>
+                                <p class="text-xs text-gray-500">ppm</p>
+                            </div>
+                            <div class="metric-card bg-green-50 rounded-lg p-4 text-center">
+                                <div class="gauge-container mx-auto w-16 h-16">
+                                    <canvas id="noiseGauge-3" class="w-full h-full"></canvas>
+                                    <div class="gauge-value text-green-600">38</div>
+                                </div>
+                                <p class="text-sm font-medium text-gray-700 mt-2">Noise</p>
+                                <p class="text-xs text-gray-500">dB</p>
+                            </div>
+                            <div class="metric-card bg-green-50 rounded-lg p-4 text-center">
+                                <div class="gauge-container mx-auto w-16 h-16">
+                                    <canvas id="lightGauge-3" class="w-full h-full"></canvas>
+                                    <div class="gauge-value text-green-600">480</div>
+                                </div>
+                                <p class="text-sm font-medium text-gray-700 mt-2">Light</p>
+                                <p class="text-xs text-gray-500">lux</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Detailed Metrics -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                        <!-- Air Quality Chart -->
+                        <div class="wellbeing-card bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4">Air Quality Trends</h3>
+                            <div id="airQualityChart-3" class="chart-container"></div>
+                        </div>
+
+                        <!-- Power Consumption -->
+                        <div class="wellbeing-card bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4">Power Consumption</h3>
+                            <div id="powerChart-3" class="chart-container"></div>
+                        </div>
+                    </div>
+
+                    <!-- Recommendations -->
+                    <div class="wellbeing-card bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">AI Health Recommendations</h3>
+                        <div class="space-y-4">
+                            <div class="recommendation-card bg-green-50 p-4 rounded-lg">
+                                <div class="flex items-start space-x-3">
+                                    <i class="fas fa-check-circle text-green-600 mt-1"></i>
+                                    <div>
+                                        <h4 class="font-medium text-gray-800">Optimal Environment</h4>
+                                        <p class="text-sm text-gray-600">All environmental parameters are within excellent ranges. This floor provides ideal working conditions.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="recommendation-card bg-blue-50 p-4 rounded-lg">
+                                <div class="flex items-start space-x-3">
+                                    <i class="fas fa-leaf text-blue-600 mt-1"></i>
+                                    <div>
+                                        <h4 class="font-medium text-gray-800">Energy Efficiency</h4>
+                                        <p class="text-sm text-gray-600">Power consumption is 15% below average. Great job on energy conservation!</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4th Floor Tab -->
+                <div id="floor-4" class="tab-content">
+                    <!-- Overall Wellbeing Score -->
+                    <div class="wellbeing-card bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-semibold text-gray-800">4th Floor Environmental Status</h3>
+                            <span class="status-fair px-3 py-1 rounded-full text-xs font-medium">Fair</span>
+                        </div>
+                        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                            <div class="metric-card bg-yellow-50 rounded-lg p-4 text-center">
+                                <div class="gauge-container mx-auto w-16 h-16">
+                                    <canvas id="pm25Gauge-4" class="w-full h-full"></canvas>
+                                    <div class="gauge-value text-yellow-600">28</div>
+                                </div>
+                                <p class="text-sm font-medium text-gray-700 mt-2">PM2.5</p>
+                                <p class="text-xs text-gray-500">μg/m³</p>
+                            </div>
+                            <div class="metric-card bg-yellow-50 rounded-lg p-4 text-center">
+                                <div class="gauge-container mx-auto w-16 h-16">
+                                    <canvas id="co2Gauge-4" class="w-full h-full"></canvas>
+                                    <div class="gauge-value text-yellow-600">820</div>
+                                </div>
+                                <p class="text-sm font-medium text-gray-700 mt-2">CO₂</p>
+                                <p class="text-xs text-gray-500">ppm</p>
+                            </div>
+                            <div class="metric-card bg-orange-50 rounded-lg p-4 text-center">
+                                <div class="gauge-container mx-auto w-16 h-16">
+                                    <canvas id="noiseGauge-4" class="w-full h-full"></canvas>
+                                    <div class="gauge-value text-orange-600">58</div>
+                                </div>
+                                <p class="text-sm font-medium text-gray-700 mt-2">Noise</p>
+                                <p class="text-xs text-gray-500">dB</p>
+                            </div>
+                            <div class="metric-card bg-blue-50 rounded-lg p-4 text-center">
+                                <div class="gauge-container mx-auto w-16 h-16">
+                                    <canvas id="lightGauge-4" class="w-full h-full"></canvas>
+                                    <div class="gauge-value text-blue-600">380</div>
+                                </div>
+                                <p class="text-sm font-medium text-gray-700 mt-2">Light</p>
+                                <p class="text-xs text-gray-500">lux</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Detailed Metrics -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                        <!-- Air Quality Chart -->
+                        <div class="wellbeing-card bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4">Air Quality Trends</h3>
+                            <div id="airQualityChart-4" class="chart-container"></div>
+                        </div>
+
+                        <!-- Power Consumption -->
+                        <div class="wellbeing-card bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4">Power Consumption</h3>
+                            <div id="powerChart-4" class="chart-container"></div>
+                        </div>
+                    </div>
+
+                    <!-- Recommendations -->
+                    <div class="wellbeing-card bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">AI Health Recommendations</h3>
+                        <div class="space-y-4">
+                            <div class="recommendation-card bg-yellow-50 p-4 rounded-lg">
+                                <div class="flex items-start space-x-3">
+                                    <i class="fas fa-exclamation-triangle text-yellow-600 mt-1"></i>
+                                    <div>
+                                        <h4 class="font-medium text-gray-800">Increase Ventilation</h4>
+                                        <p class="text-sm text-gray-600">CO₂ levels are elevated. Consider increasing fresh air intake or opening windows.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="recommendation-card bg-orange-50 p-4 rounded-lg">
+                                <div class="flex items-start space-x-3">
+                                    <i class="fas fa-volume-up text-orange-600 mt-1"></i>
+                                    <div>
+                                        <h4 class="font-medium text-gray-800">Noise Reduction</h4>
+                                        <p class="text-sm text-gray-600">Noise levels are above optimal. Consider using noise-absorbing materials or white noise machines.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="recommendation-card bg-blue-50 p-4 rounded-lg">
+                                <div class="flex items-start space-x-3">
+                                    <i class="fas fa-lightbulb text-blue-600 mt-1"></i>
+                                    <div>
+                                        <h4 class="font-medium text-gray-800">Lighting Adjustment</h4>
+                                        <p class="text-sm text-gray-600">Light levels are below optimal for detailed work. Consider adding task lighting.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 5th Floor Tab -->
+                <div id="floor-5" class="tab-content">
+                    <!-- Overall Wellbeing Score -->
+                    <div class="wellbeing-card bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-semibold text-gray-800">5th Floor Environmental Status</h3>
+                            <span class="status-good px-3 py-1 rounded-full text-xs font-medium">Good</span>
+                        </div>
+                        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                            <div class="metric-card bg-green-50 rounded-lg p-4 text-center">
+                                <div class="gauge-container mx-auto w-16 h-16">
+                                    <canvas id="pm25Gauge-5" class="w-full h-full"></canvas>
+                                    <div class="gauge-value text-green-600">15</div>
+                                </div>
+                                <p class="text-sm font-medium text-gray-700 mt-2">PM2.5</p>
+                                <p class="text-xs text-gray-500">μg/m³</p>
+                            </div>
+                            <div class="metric-card bg-blue-50 rounded-lg p-4 text-center">
+                                <div class="gauge-container mx-auto w-16 h-16">
+                                    <canvas id="co2Gauge-5" class="w-full h-full"></canvas>
+                                    <div class="gauge-value text-blue-600">720</div>
+                                </div>
+                                <p class="text-sm font-medium text-gray-700 mt-2">CO₂</p>
+                                <p class="text-xs text-gray-500">ppm</p>
+                            </div>
+                            <div class="metric-card bg-green-50 rounded-lg p-4 text-center">
+                                <div class="gauge-container mx-auto w-16 h-16">
+                                    <canvas id="noiseGauge-5" class="w-full h-full"></canvas>
+                                    <div class="gauge-value text-green-600">45</div>
+                                </div>
+                                <p class="text-sm font-medium text-gray-700 mt-2">Noise</p>
+                                <p class="text-xs text-gray-500">dB</p>
+                            </div>
+                            <div class="metric-card bg-purple-50 rounded-lg p-4 text-center">
+                                <div class="gauge-container mx-auto w-16 h-16">
+                                    <canvas id="lightGauge-5" class="w-full h-full"></canvas>
+                                    <div class="gauge-value text-purple-600">650</div>
+                                </div>
+                                <p class="text-sm font-medium text-gray-700 mt-2">Light</p>
+                                <p class="text-xs text-gray-500">lux</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Detailed Metrics -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                        <!-- Air Quality Chart -->
+                        <div class="wellbeing-card bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4">Air Quality Trends</h3>
+                            <div id="airQualityChart-5" class="chart-container"></div>
+                        </div>
+
+                        <!-- Power Consumption -->
+                        <div class="wellbeing-card bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4">Power Consumption</h3>
+                            <div id="powerChart-5" class="chart-container"></div>
+                        </div>
+                    </div>
+
+                    <!-- Recommendations -->
+                    <div class="wellbeing-card bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">AI Health Recommendations</h3>
+                        <div class="space-y-4">
+                            <div class="recommendation-card bg-blue-50 p-4 rounded-lg">
+                                <div class="flex items-start space-x-3">
+                                    <i class="fas fa-thermometer-half text-blue-600 mt-1"></i>
+                                    <div>
+                                        <h4 class="font-medium text-gray-800">Temperature Balance</h4>
+                                        <p class="text-sm text-gray-600">Temperature and humidity levels are well-balanced. Maintain current HVAC settings for optimal comfort.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="recommendation-card bg-green-50 p-4 rounded-lg">
+                                <div class="flex items-start space-x-3">
+                                    <i class="fas fa-leaf text-green-600 mt-1"></i>
+                                    <div>
+                                        <h4 class="font-medium text-gray-800">Air Circulation</h4>
+                                        <p class="text-sm text-gray-600">Air circulation is good. Consider adding plants to further improve air quality and employee wellbeing.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Bottom Navigation -->
+    <div class="lg:hidden mobile-nav fixed left-0 right-0 bg-white border-t border-gray-200 px-4 py-2">
+        <div class="flex justify-around">
+            <a href="index.html" class="flex flex-col items-center py-2 text-gray-500">
+                <i class="fas fa-tachometer-alt text-lg"></i>
+                <span class="text-xs mt-1">Dashboard</span>
+            </a>
+            <a href="office-updates.html" class="flex flex-col items-center py-2 text-gray-500">
+                <i class="fas fa-newspaper text-lg"></i>
+                <span class="text-xs mt-1">Updates</span>
+            </a>
+            <a href="employee-hub.html" class="flex flex-col items-center py-2 text-gray-500">
+                <i class="fas fa-users text-lg"></i>
+                <span class="text-xs mt-1">Hub</span>
+            </a>
+            <a href="program-calendar.html" class="flex flex-col items-center py-2 text-gray-500">
+                <i class="fas fa-calendar text-lg"></i>
+                <span class="text-xs mt-1">Calendar</span>
+            </a>
+            <a href="wellbeing.html" class="flex flex-col items-center py-2 text-gray-800">
+                <i class="fas fa-heartbeat text-lg"></i>
+                <span class="text-xs mt-1">Wellbeing</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Add bottom padding for mobile navigation -->
+    <div class="lg:hidden h-20"></div>
+
+    <script src="main.js"></script>
+    <script>
+        // Wellbeing specific functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            // Tab switching
+            const tabButtons = document.querySelectorAll('.tab-button');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const targetTab = button.dataset.tab;
+                    
+                    // Update active tab
+                    tabButtons.forEach(btn => btn.classList.remove('active'));
+                    tabContents.forEach(content => content.classList.remove('active'));
+                    
+                    button.classList.add('active');
+                    document.getElementById(targetTab).classList.add('active');
+                    
+                    // Animate tab transition
+                    anime({
+                        targets: `#${targetTab}`,
+                        opacity: [0, 1],
+                        translateY: [20, 0],
+                        duration: 300,
+                        easing: 'easeOutQuart'
+                    });
+                });
+            });
+
+            // Initialize gauges and charts
+            initializeGauges();
+            initializeCharts();
+
+            // Update timestamp
+            function updateLastUpdated() {
+                const now = new Date();
+                const timeString = now.toLocaleTimeString('en-US', { 
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                });
+                document.getElementById('lastUpdated').textContent = `Just now`;
+                
+                setTimeout(() => {
+                    document.getElementById('lastUpdated').textContent = `1 minute ago`;
+                }, 60000);
+            }
+
+            updateLastUpdated();
+            setInterval(updateLastUpdated, 60000);
+
+            // Animate metric cards on load
+            anime({
+                targets: '.metric-card',
+                scale: [0.8, 1],
+                opacity: [0, 1],
+                delay: anime.stagger(100),
+                duration: 600,
+                easing: 'easeOutBack'
+            });
+
+            // Animate wellbeing cards on load
+            anime({
+                targets: '.wellbeing-card',
+                translateY: [30, 0],
+                opacity: [0, 1],
+                delay: anime.stagger(150),
+                duration: 800,
+                easing: 'easeOutQuart'
+            });
+        });
+
+        function initializeGauges() {
+            const floors = [2, 3, 4, 5];
+            const metrics = ['pm25', 'co2', 'noise', 'light'];
+            
+            floors.forEach(floor => {
+                metrics.forEach(metric => {
+                    const canvas = document.getElementById(`${metric}Gauge-${floor}`);
+                    if (canvas) {
+                        const ctx = canvas.getContext('2d');
+                        drawGauge(ctx, canvas.width, canvas.height, getMetricValue(metric, floor), getMetricMax(metric));
+                    }
+                });
+            });
+        }
+
+        function drawGauge(ctx, width, height, value, maxValue) {
+            const centerX = width / 2;
+            const centerY = height / 2;
+            const radius = Math.min(width, height) / 2 - 5;
+            
+            // Clear canvas
+            ctx.clearRect(0, 0, width, height);
+            
+            // Background arc
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+            ctx.strokeStyle = '#E5E7EB';
+            ctx.lineWidth = 8;
+            ctx.stroke();
+            
+            // Value arc
+            const angle = (value / maxValue) * 2 * Math.PI;
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius, -Math.PI / 2, -Math.PI / 2 + angle);
+            ctx.strokeStyle = '#3B82F6';
+            ctx.lineWidth = 8;
+            ctx.stroke();
+        }
+
+        function getMetricValue(metric, floor) {
+            const values = {
+                pm25: { 2: 12, 3: 8, 4: 28, 5: 15 },
+                co2: { 2: 650, 3: 580, 4: 820, 5: 720 },
+                noise: { 2: 42, 3: 38, 4: 58, 5: 45 },
+                light: { 2: 520, 3: 480, 4: 380, 5: 650 }
+            };
+            return values[metric][floor] || 0;
+        }
+
+        function getMetricMax(metric) {
+            const maxValues = {
+                pm25: 50,
+                co2: 1000,
+                noise: 70,
+                light: 800
+            };
+            return maxValues[metric] || 100;
+        }
+
+        function initializeCharts() {
+            const floors = [2, 3, 4, 5];
+            
+            floors.forEach(floor => {
+                initializeAirQualityChart(floor);
+                initializePowerChart(floor);
+            });
+        }
+
+        function initializeAirQualityChart(floor) {
+            const chartElement = document.getElementById(`airQualityChart-${floor}`);
+            if (!chartElement) return;
+            
+            const chart = echarts.init(chartElement);
+            
+            const option = {
+                backgroundColor: 'transparent',
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '3%',
+                    containLabel: true
+                },
+                xAxis: {
+                    type: 'category',
+                    data: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00'],
+                    axisLine: { lineStyle: { color: '#E2E8F0' } },
+                    axisTick: { show: false },
+                    axisLabel: { color: '#64748B', fontSize: 10 }
+                },
+                yAxis: {
+                    type: 'value',
+                    axisLine: { show: false },
+                    axisTick: { show: false },
+                    axisLabel: { color: '#64748B', fontSize: 10 },
+                    splitLine: { lineStyle: { color: '#F1F5F9' } }
+                },
+                series: [
+                    {
+                        name: 'PM2.5',
+                        data: generateMockData(24, floor),
+                        type: 'line',
+                        smooth: true,
+                        lineStyle: { color: '#10B981', width: 2 },
+                        itemStyle: { color: '#10B981' },
+                        areaStyle: {
+                            color: {
+                                type: 'linear',
+                                x: 0, y: 0, x2: 0, y2: 1,
+                                colorStops: [
+                                    { offset: 0, color: 'rgba(16, 185, 129, 0.3)' },
+                                    { offset: 1, color: 'rgba(16, 185, 129, 0.05)' }
+                                ]
+                            }
+                        }
+                    },
+                    {
+                        name: 'CO₂',
+                        data: generateMockData(800, floor),
+                        type: 'line',
+                        smooth: true,
+                        lineStyle: { color: '#3B82F6', width: 2 },
+                        itemStyle: { color: '#3B82F6' },
+                        areaStyle: {
+                            color: {
+                                type: 'linear',
+                                x: 0, y: 0, x2: 0, y2: 1,
+                                colorStops: [
+                                    { offset: 0, color: 'rgba(59, 130, 246, 0.3)' },
+                                    { offset: 1, color: 'rgba(59, 130, 246, 0.05)' }
+                                ]
+                            }
+                        }
+                    }
+                ],
+                tooltip: {
+                    trigger: 'axis',
+                    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                    borderColor: '#E5E7EB',
+                    textStyle: { color: '#374151' }
+                }
+            };
+            
+            chart.setOption(option);
+            
+            // Make chart responsive
+            window.addEventListener('resize', () => {
+                chart.resize();
+            });
+        }
+
+        function initializePowerChart(floor) {
+            const chartElement = document.getElementById(`powerChart-${floor}`);
+            if (!chartElement) return;
+            
+            const chart = echarts.init(chartElement);
+            
+            const option = {
+                backgroundColor: 'transparent',
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '3%',
+                    containLabel: true
+                },
+                xAxis: {
+                    type: 'category',
+                    data: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00'],
+                    axisLine: { lineStyle: { color: '#E2E8F0' } },
+                    axisTick: { show: false },
+                    axisLabel: { color: '#64748B', fontSize: 10 }
+                },
+                yAxis: {
+                    type: 'value',
+                    axisLine: { show: false },
+                    axisTick: { show: false },
+                    axisLabel: { color: '#64748B', fontSize: 10 },
+                    splitLine: { lineStyle: { color: '#F1F5F9' } }
+                },
+                series: [
+                    {
+                        name: 'Power (kW)',
+                        data: generateMockData(25, floor),
+                        type: 'bar',
+                        itemStyle: { color: '#8B5CF6' },
+                        barWidth: '60%'
+                    }
+                ],
+                tooltip: {
+                    trigger: 'axis',
+                    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                    borderColor: '#E5E7EB',
+                    textStyle: { color: '#374151' }
+                }
+            };
+            
+            chart.setOption(option);
+            
+            // Make chart responsive
+            window.addEventListener('resize', () => {
+                chart.resize();
+            });
+        }
+
+        function generateMockData(baseValue, floor) {
+            const data = [];
+            for (let i = 0; i < 6; i++) {
+                const variation = Math.random() * 0.3 - 0.15; // ±15% variation
+                const value = baseValue * (1 + variation) * (1 + (floor - 3) * 0.1);
+                data.push(Math.round(value));
+            }
+            return data;
+        }
+    </script>
+</body>
+</html>

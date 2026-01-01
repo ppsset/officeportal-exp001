@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shared Facilities - WAG Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        .sidebar-collapsed { transform: translateX(-100%); }
+        .sidebar-expanded { transform: translateX(0); }
+        .tab-button.active { background-color: #F3F4F6; color: #1F2937; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .mobile-nav { bottom: 0; z-index: 50; }
+        .modal { backdrop-filter: blur(4px); }
+        .facility-card { transition: all 0.3s ease; }
+        .facility-card:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
+        .status-available { background-color: #D1FAE5; color: #065F46; }
+        .status-booked { background-color: #FEE2E2; color: #991B1B; }
+        .status-maintenance { background-color: #FEF3C7; color: #92400E; }
+        .time-slot { transition: all 0.2s ease; cursor: pointer; }
+        .time-slot:hover { background-color: #F3F4F6; }
+        .time-slot.selected { background-color: #DBEAFE; color: #1E40AF; }
+        .time-slot.booked { background-color: #FEE2E2; color: #991B1B; cursor: not-allowed; }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; }
+        .calendar-day { min-height: 80px; background: white; border: 1px solid #E5E7EB; position: relative; cursor: pointer; }
+        .calendar-day:hover { background-color: #F9FAFB; }
+        .calendar-day.other-month { background-color: #F9FAFB; color: #9CA3AF; }
+        .calendar-day.today { background-color: #EFF6FF; border-color: #3B82F6; }
+        .calendar-day.selected { background-color: #EDE9FE; border-color: #8B5CF6; }
+        .booking-dot { width: 6px; height: 6px; border-radius: 50%; margin: 1px; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 overflow-x-hidden">
+    
+    <!-- Sidebar Navigation -->
+    <div id="sidebar" class="fixed left-0 top-0 h-full w-64 bg-white shadow-lg z-40 transition-transform duration-300 sidebar-expanded">
+        <div class="p-6 border-b border-gray-200">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-gray-700 to-gray-900 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-building text-white text-lg"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold text-gray-800">WAG Portal</h1>
+                        <p class="text-xs text-gray-500">MEP Design Office</p>
+                    </div>
+                </div>
+                <button id="sidebarToggle" class="lg:hidden text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+        </div>
+        
+        <nav class="p-4">
+            <ul class="space-y-2">
+                <li>
+                    <a href="index.html" class="flex items-center space-x-3 px-4 py-3 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+                        <i class="fas fa-tachometer-alt w-5"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="office-updates.html" class="flex items-center space-x-3 px-4 py-3 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+                        <i class="fas fa-newspaper w-5"></i>
+                        <span>Office Updates</span>
+                        <span class="ml-auto bg-orange-100 text-orange-600 text-xs px-2 py-1 rounded-full">3</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="employee-hub.html" class="flex items-center space-x-3 px-4 py-3 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+                        <i class="fas fa-users w-5"></i>
+                        <span>Employee Hub</span>
+                        <span class="ml-auto bg-blue-100 text-blue-600 text-xs px-2 py-1 rounded-full">5</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="program-calendar.html" class="flex items-center space-x-3 px-4 py-3 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+                        <i class="fas fa-calendar-alt w-5"></i>
+                        <span>Program Calendar</span>
+                        <span class="ml-auto bg-green-100 text-green-600 text-xs px-2 py-1 rounded-full">2</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="tech-knowledge.html" class="flex items-center space-x-3 px-4 py-3 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+                        <i class="fas fa-book w-5"></i>
+                        <span>Tech Knowledge</span>
+                        <span class="ml-auto bg-purple-100 text-purple-600 text-xs px-2 py-1 rounded-full">7</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="shared-facilities.html" class="flex items-center space-x-3 px-4 py-3 bg-gray-100 text-gray-800 rounded-lg font-medium">
+                        <i class="fas fa-building w-5"></i>
+                        <span>Shared Facilities</span>
+                        <span class="ml-auto bg-teal-100 text-teal-600 text-xs px-2 py-1 rounded-full">4</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="wellbeing.html" class="flex items-center space-x-3 px-4 py-3 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+                        <i class="fas fa-heartbeat w-5"></i>
+                        <span>Wellbeing</span>
+                        <span class="ml-auto bg-red-100 text-red-600 text-xs px-2 py-1 rounded-full">Good</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+        
+        <div class="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200">
+            <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                <div class="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
+                    <i class="fas fa-user text-gray-600 text-sm"></i>
+                </div>
+                <div class="flex-1">
+                    <p class="text-sm font-medium text-gray-800">John Smith</p>
+                    <p class="text-xs text-gray-500">Senior Engineer</p>
+                </div>
+                <button class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-cog"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Header -->
+    <div class="lg:hidden fixed top-0 left-0 right-0 bg-white shadow-sm z-30 p-4">
+        <div class="flex items-center justify-between">
+            <button id="mobileSidebarToggle" class="text-gray-600 hover:text-gray-800">
+                <i class="fas fa-bars text-xl"></i>
+            </button>
+            <div class="flex items-center space-x-2">
+                <div class="w-8 h-8 bg-gradient-to-br from-gray-700 to-gray-900 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-building text-white text-sm"></i>
+                </div>
+                <span class="font-bold text-gray-800">WAG Portal</span>
+            </div>
+            <div class="w-8"></div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div id="mainContent" class="lg:ml-64 min-h-screen">
+        <!-- Header -->
+        <div class="bg-white shadow-sm">
+            <div class="px-8 py-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-800">Shared Facilities</h2>
+                        <p class="text-gray-600 mt-1">Reserve meeting rooms, Zoom accounts, and shared resources</p>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <button class="relative p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors">
+                            <i class="fas fa-bell text-xl"></i>
+                            <span class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">4</span>
+                        </button>
+                        <button class="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors">
+                            <i class="fas fa-search text-xl"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabs and Controls -->
+        <div class="px-8 py-6">
+            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-6">
+                <!-- Tab Navigation -->
+                <div class="flex space-x-1 bg-gray-100 p-1 rounded-lg mb-4 lg:mb-0">
+                    <button class="tab-button active px-4 py-2 rounded-md text-sm font-medium transition-colors" data-tab="meeting-rooms">
+                        <i class="fas fa-door-open mr-2"></i>Meeting Rooms
+                    </button>
+                    <button class="tab-button px-4 py-2 rounded-md text-sm font-medium transition-colors" data-tab="zoom-accounts">
+                        <i class="fas fa-video mr-2"></i>Zoom Accounts
+                    </button>
+                    <button class="tab-button px-4 py-2 rounded-md text-sm font-medium transition-colors" data-tab="my-reservations">
+                        <i class="fas fa-calendar-check mr-2"></i>My Reservations
+                    </button>
+                    <button class="tab-button px-4 py-2 rounded-md text-sm font-medium transition-colors" data-tab="all-reservations">
+                        <i class="fas fa-list mr-2"></i>All Reservations
+                    </button>
+                </div>
+
+                <!-- Create Reservation Button -->
+                <button id="createReservationBtn" class="bg-teal-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-teal-700 transition-colors">
+                    <i class="fas fa-plus mr-2"></i>Book Facility
+                </button>
+            </div>
+
+            <!-- Content Container -->
+            <div class="space-y-6">
+                
+                <!-- Meeting Rooms Tab -->
+                <div id="meeting-rooms" class="tab-content active">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        
+                        <!-- Meeting Room 1 -->
+                        <div class="facility-card bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                            <div class="flex items-start justify-between mb-4">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-12 h-12 bg-teal-100 rounded-lg flex items-center justify-center">
+                                        <i class="fas fa-door-open text-teal-600 text-xl"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-semibold text-gray-800">Conference Room 1</h3>
+                                        <p class="text-sm text-gray-500">Capacity: 12 people</p>
+                                    </div>
+                                </div>
+                                <span class="status-available px-3 py-1 rounded-full text-xs font-medium">Available</span>
+                            </div>
+                            <div class="mb-4">
+                                <img src="resources/meeting-room.png" alt="Conference Room 1" class="w-full h-32 object-cover rounded-lg">
+                            </div>
+                            <p class="text-gray-600 mb-4">Large conference room with projector, whiteboard, and video conferencing capabilities. Perfect for team meetings and client presentations.</p>
+                            <div class="flex items-center justify-between text-sm text-gray-500 mb-4">
+                                <span><i class="fas fa-map-marker-alt mr-1"></i>2nd Floor, East Wing</span>
+                                <span><i class="fas fa-users mr-1"></i>12 max capacity</span>
+                            </div>
+                            <div class="flex space-x-2">
+                                <button class="flex-1 bg-teal-50 text-teal-600 py-2 px-4 rounded-lg text-sm font-medium hover:bg-teal-100 transition-colors">
+                                    <i class="fas fa-calendar-plus mr-1"></i>Book Now
+                                </button>
+                                <button class="bg-gray-50 text-gray-600 py-2 px-4 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors">
+                                    <i class="fas fa-info-circle mr-1"></i>Details
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Meeting Room 2 -->
+                        <div class="facility-card bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                            <div class="flex items-start justify-between mb-4">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                                        <i class="fas fa-door-open text-blue-600 text-xl"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-semibold text-gray-800">Conference Room 2</h3>
+                                        <p class="text-sm text-gray-500">Capacity: 8 people</p>
+                                    </div>
+                                </div>
+                                <span class="status-booked px-3 py-1 rounded-full text-xs font-medium">Booked</span>
+                            </div>
+                            <div class="mb-4">
+                                <img src="resources/meeting-room.png" alt="Conference Room 2" class="w-full h-32 object-cover rounded-lg">
+                            </div>
+                            <p class="text-gray-600 mb-4">Medium-sized conference room ideal for smaller team meetings and brainstorming sessions. Equipped with display screen and conference phone.</p>
+                            <div class="flex items-center justify-between text-sm text-gray-500 mb-4">
+                                <span><i class="fas fa-map-marker-alt mr-1"></i>2nd Floor, West Wing</span>
+                                <span><i class="fas fa-users mr-1"></i>8 max capacity</span>
+                            </div>
+                            <div class="flex space-x-2">
+                                <button class="flex-1 bg-gray-100 text-gray-500 py-2 px-4 rounded-lg text-sm font-medium cursor-not-allowed">
+                                    <i class="fas fa-clock mr-1"></i>Busy (2:00-4:00 PM)
+                                </button>
+                                <button class="bg-gray-50 text-gray-600 py-2 px-4 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors">
+                                    <i class="fas fa-info-circle mr-1"></i>Details
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Meeting Room 3 -->
+                        <div class="facility-card bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                            <div class="flex items-start justify-between mb-4">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                                        <i class="fas fa-door-open text-purple-600 text-xl"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-semibold text-gray-800">Brainstorm Room</h3>
+                                        <p class="text-sm text-gray-500">Capacity: 6 people</p>
+                                    </div>
+                                </div>
+                                <span class="status-available px-3 py-1 rounded-full text-xs font-medium">Available</span>
+                            </div>
+                            <div class="mb-4">
+                                <img src="resources/meeting-room.png" alt="Brainstorm Room" class="w-full h-32 object-cover rounded-lg">
+                            </div>
+                            <p class="text-gray-600 mb-4">Creative space with whiteboard walls, flexible seating, and collaborative tools. Perfect for brainstorming sessions and creative workshops.</p>
+                            <div class="flex items-center justify-between text-sm text-gray-500 mb-4">
+                                <span><i class="fas fa-map-marker-alt mr-1"></i>3rd Floor, Creative Zone</span>
+                                <span><i class="fas fa-users mr-1"></i>6 max capacity</span>
+                            </div>
+                            <div class="flex space-x-2">
+                                <button class="flex-1 bg-teal-50 text-teal-600 py-2 px-4 rounded-lg text-sm font-medium hover:bg-teal-100 transition-colors">
+                                    <i class="fas fa-calendar-plus mr-1"></i>Book Now
+                                </button>
+                                <button class="bg-gray-50 text-gray-600 py-2 px-4 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors">
+                                    <i class="fas fa-info-circle mr-1"></i>Details
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Meeting Room 4 -->
+                        <div class="facility-card bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                            <div class="flex items-start justify-between mb-4">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+                                        <i class="fas fa-door-open text-orange-600 text-xl"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-semibold text-gray-800">Executive Boardroom</h3>
+                                        <p class="text-sm text-gray-500">Capacity: 16 people</p>
+                                    </div>
+                                </div>
+                                <span class="status-maintenance px-3 py-1 rounded-full text-xs font-medium">Maintenance</span>
+                            </div>
+                            <div class="mb-4">
+                                <img src="resources/meeting-room.png" alt="Executive Boardroom" class="w-full h-32 object-cover rounded-lg">
+                            </div>
+                            <p class="text-gray-600 mb-4">Premium boardroom with large conference table, executive chairs, 85" display, and advanced AV system. Reserved for executive meetings and important clients.</p>
+                            <div class="flex items-center justify-between text-sm text-gray-500 mb-4">
+                                <span><i class="fas fa-map-marker-alt mr-1"></i>1st Floor, Executive Wing</span>
+                                <span><i class="fas fa-users mr-1"></i>16 max capacity</span>
+                            </div>
+                            <div class="flex space-x-2">
+                                <button class="flex-1 bg-gray-100 text-gray-500 py-2 px-4 rounded-lg text-sm font-medium cursor-not-allowed">
+                                    <i class="fas fa-wrench mr-1"></i>Under Maintenance
+                                </button>
+                                <button class="bg-gray-50 text-gray-600 py-2 px-4 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors">
+                                    <i class="fas fa-info-circle mr-1"></i>Details
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Zoom Accounts Tab -->
+                <div id="zoom-accounts" class="tab-content">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        
+                        <!-- Zoom Account 1 -->
+                        <div class="facility-card bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                            <div class="flex items-start justify-between mb-4">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                                        <i class="fas fa-video text-blue-600 text-xl"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-semibold text-gray-800">Zoom Pro Account 1</h3>
+                                        <p class="text-sm text-gray-500">Licensed User: john.smith@company.com</p>
+                                    </div>
+                                </div>
+                                <span class="status-available px-3 py-1 rounded-full text-xs font-medium">Available</span>
+                            </div>
+                            <div class="mb-4">
+                                <div class="bg-gray-100 rounded-lg p-4 text-center">
+                                    <i class="fas fa-video text-gray-400 text-3xl mb-2"></i>
+                                    <p class="text-sm text-gray-600">Zoom Pro License</p>
+                                </div>
+                            </div>
+                            <p class="text-gray-600 mb-4">Professional Zoom account with 100 participant limit, recording capabilities, and breakout rooms. Perfect for client meetings and team collaborations.</p>
+                            <div class="flex items-center justify-between text-sm text-gray-500 mb-4">
+                                <span><i class="fas fa-users mr-1"></i>100 participants</span>
+                                <span><i class="fas fa-clock mr-1"></i>No time limit</span>
+                            </div>
+                            <div class="flex space-x-2">
+                                <button class="flex-1 bg-blue-50 text-blue-600 py-2 px-4 rounded-lg text-sm font-medium hover:bg-blue-100 transition-colors">
+                                    <i class="fas fa-calendar-plus mr-1"></i>Reserve
+                                </button>
+                                <button class="bg-gray-50 text-gray-600 py-2 px-4 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors">
+                                    <i class="fas fa-info-circle mr-1"></i>Details
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Zoom Account 2 -->
+                        <div class="facility-card bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                            <div class="flex items-start justify-between mb-4">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                                        <i class="fas fa-video text-green-600 text-xl"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-semibold text-gray-800">Zoom Pro Account 2</h3>
+                                        <p class="text-sm text-gray-500">Licensed User: sarah.johnson@company.com</p>
+                                    </div>
+                                </div>
+                                <span class="status-booked px-3 py-1 rounded-full text-xs font-medium">Booked</span>
+                            </div>
+                            <div class="mb-4">
+                                <div class="bg-gray-100 rounded-lg p-4 text-center">
+                                    <i class="fas fa-video text-gray-400 text-3xl mb-2"></i>
+                                    <p class="text-sm text-gray-600">Zoom Pro License</p>
+                                </div>
+                            </div>
+                            <p class="text-gray-600 mb-4">Professional Zoom account with all premium features. Currently in use for training session until 4:00 PM.</p>
+                            <div class="flex items-center justify-between text-sm text-gray-500 mb-4">
+                                <span><i class="fas fa-users mr-1"></i>100 participants</span>
+                                <span><i class="fas fa-clock mr-1"></i>Busy (2:00-4:00 PM)</span>
+                            </div>
+                            <div class="flex space-x-2">
+                                <button class="flex-1 bg-gray-100 text-gray-500 py-2 px-4 rounded-lg text-sm font-medium cursor-not-allowed">
+                                    <i class="fas fa-clock mr-1"></i>Currently in Use
+                                </button>
+                                <button class="bg-gray-50 text-gray-600 py-2 px-4 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors">
+                                    <i class="fas fa-info-circle mr-1"></i>Details
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- My Reservations Tab -->
+                <div id="my-reservations" class="tab-content">
+                    <div class="space-y-4">
+                        
+                        <!-- Reservation Item 1 -->
+                        <div class="facility-card bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                            <div class="flex items-start justify-between mb-4">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-10 h-10 bg-teal-100 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-door-open text-teal-600"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-semibold text-gray-800">Conference Room 1</h3>
+                                        <p class="text-sm text-gray-500">Today • 2:00 PM - 4:00 PM</p>
+                                    </div>
+                                </div>
+                                <div class="flex space-x-2">
+                                    <button class="text-gray-400 hover:text-blue-600">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="text-gray-400 hover:text-red-600">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <p class="text-gray-600 mb-3">Design Review Meeting - MEP Team</p>
+                            <div class="flex items-center justify-between text-sm text-gray-500">
+                                <span><i class="fas fa-users mr-1"></i>8 participants</span>
+                                <span><i class="fas fa-clock mr-1"></i>2 hours</span>
+                            </div>
+                        </div>
+
+                        <!-- Reservation Item 2 -->
+                        <div class="facility-card bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                            <div class="flex items-start justify-between mb-4">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-video text-blue-600"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-semibold text-gray-800">Zoom Pro Account 1</h3>
+                                        <p class="text-sm text-gray-500">Tomorrow • 10:00 AM - 11:30 AM</p>
+                                    </div>
+                                </div>
+                                <div class="flex space-x-2">
+                                    <button class="text-gray-400 hover:text-blue-600">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="text-gray-400 hover:text-red-600">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <p class="text-gray-600 mb-3">Client Presentation - HVAC Proposal</p>
+                            <div class="flex items-center justify-between text-sm text-gray-500">
+                                <span><i class="fas fa-users mr-1"></i>5 participants</span>
+                                <span><i class="fas fa-clock mr-1"></i>1.5 hours</span>
+                            </div>
+                        </div>
+
+                        <!-- Reservation Item 3 -->
+                        <div class="facility-card bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                            <div class="flex items-start justify-between mb-4">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-door-open text-purple-600"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-semibold text-gray-800">Brainstorm Room</h3>
+                                        <p class="text-sm text-gray-500">Jan 5, 2025 • 3:00 PM - 5:00 PM</p>
+                                    </div>
+                                </div>
+                                <div class="flex space-x-2">
+                                    <button class="text-gray-400 hover:text-blue-600">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="text-gray-400 hover:text-red-600">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <p class="text-gray-600 mb-3">Innovation Workshop - New Product Ideas</p>
+                            <div class="flex items-center justify-between text-sm text-gray-500">
+                                <span><i class="fas fa-users mr-1"></i>6 participants</span>
+                                <span><i class="fas fa-clock mr-1"></i>2 hours</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- All Reservations Tab -->
+                <div id="all-reservations" class="tab-content">
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                        <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
+                            <h3 class="text-lg font-semibold text-gray-800">Facility Usage Calendar</h3>
+                            <p class="text-sm text-gray-600">View all facility reservations by date</p>
+                        </div>
+                        
+                        <div class="p-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <h4 class="text-md font-semibold text-gray-800" id="calendarMonth">December 2024</h4>
+                                <div class="flex space-x-2">
+                                    <button id="prevCalendarMonth" class="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </button>
+                                    <button id="nextCalendarMonth" class="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Mini Calendar -->
+                            <div class="calendar-grid mb-6">
+                                <!-- Day Headers -->
+                                <div class="p-2 text-center text-xs font-medium text-gray-500 bg-gray-50">Sun</div>
+                                <div class="p-2 text-center text-xs font-medium text-gray-500 bg-gray-50">Mon</div>
+                                <div class="p-2 text-center text-xs font-medium text-gray-500 bg-gray-50">Tue</div>
+                                <div class="p-2 text-center text-xs font-medium text-gray-500 bg-gray-50">Wed</div>
+                                <div class="p-2 text-center text-xs font-medium text-gray-500 bg-gray-50">Thu</div>
+                                <div class="p-2 text-center text-xs font-medium text-gray-500 bg-gray-50">Fri</div>
+                                <div class="p-2 text-center text-xs font-medium text-gray-500 bg-gray-50">Sat</div>
+                                
+                                <!-- Calendar Days -->
+                                <div class="calendar-day other-month p-1">
+                                    <div class="text-xs text-gray-400">1</div>
+                                </div>
+                                <div class="calendar-day other-month p-1">
+                                    <div class="text-xs text-gray-400">2</div>
+                                </div>
+                                <div class="calendar-day other-month p-1">
+                                    <div class="text-xs text-gray-400">3</div>
+                                </div>
+                                <div class="calendar-day other-month p-1">
+                                    <div class="text-xs text-gray-400">4</div>
+                                </div>
+                                <div class="calendar-day other-month p-1">
+                                    <div class="text-xs text-gray-400">5</div>
+                                </div>
+                                <div class="calendar-day other-month p-1">
+                                    <div class="text-xs text-gray-400">6</div>
+                                </div>
+                                <div class="calendar-day other-month p-1">
+                                    <div class="text-xs text-gray-400">7</div>
+                                </div>
+                                <div class="calendar-day other-month p-1">
+                                    <div class="text-xs text-gray-400">8</div>
+                                </div>
+                                <div class="calendar-day other-month p-1">
+                                    <div class="text-xs text-gray-400">9</div>
+                                </div>
+                                <div class="calendar-day other-month p-1">
+                                    <div class="text-xs text-gray-400">10</div>
+                                </div>
+                                <div class="calendar-day other-month p-1">
+                                    <div class="text-xs text-gray-400">11</div>
+                                </div>
+                                <div class="calendar-day other-month p-1">
+                                    <div class="text-xs text-gray-400">12</div>
+                                </div>
+                                <div class="calendar-day other-month p-1">
+                                    <div class="text-xs text-gray-400">13</div>
+                                </div>
+                                <div class="calendar-day other-month p-1">
+                                    <div class="text-xs text-gray-400">14</div>
+                                </div>
+                                <div class="calendar-day other-month p-1">
+                                    <div class="text-xs text-gray-400">15</div>
+                                </div>
+                                <div class="calendar-day other-month p-1">
+                                    <div class="text-xs text-gray-400">16</div>
+                                </div>
+                                <div class="calendar-day other-month p-1">
+                                    <div class="text-xs text-gray-400">17</div>
+                                </div>
+                                <div class="calendar-day other-month p-1">
+                                    <div class="text-xs text-gray-400">18</div>
+                                </div>
+                                <div class="calendar-day other-month p-1">
+                                    <div class="text-xs text-gray-400">19</div>
+                                </div>
+                                <div class="calendar-day other-month p-1">
+                                    <div class="text-xs text-gray-400">20</div>
+                                </div>
+                                <div class="calendar-day other-month p-1">
+                                    <div class="text-xs text-gray-400">21</div>
+                                </div>
+                                <div class="calendar-day other-month p-1">
+                                    <div class="text-xs text-gray-400">22</div>
+                                </div>
+                                <div class="calendar-day other-month p-1">
+                                    <div class="text-xs text-gray-400">23</div>
+                                </div>
+                                <div class="calendar-day other-month p-1">
+                                    <div class="text-xs text-gray-400">24</div>
+                                </div>
+                                <div class="calendar-day other-month p-1">
+                                    <div class="text-xs text-gray-400">25</div>
+                                </div>
+                                <div class="calendar-day other-month p-1">
+                                    <div class="text-xs text-gray-400">26</div>
+                                </div>
+                                <div class="calendar-day other-month p-1">
+                                    <div class="text-xs text-gray-400">27</div>
+                                </div>
+                                <div class="calendar-day other-month p-1">
+                                    <div class="text-xs text-gray-400">28</div>
+                                </div>
+                                <div class="calendar-day other-month p-1">
+                                    <div class="text-xs text-gray-400">29</div>
+                                </div>
+                                <div class="calendar-day other-month p-1">
+                                    <div class="text-xs text-gray-400">30</div>
+                                </div>
+                                <div class="calendar-day today p-1">
+                                    <div class="text-xs font-semibold text-blue-600">31</div>
+                                    <div class="mt-1 flex flex-wrap">
+                                        <div class="booking-dot bg-teal-500" title="Conference Room 1"></div>
+                                        <div class="booking-dot bg-blue-500" title="Zoom Account 1"></div>
+                                    </div>
+                                </div>
+                                <div class="calendar-day p-1">
+                                    <div class="text-xs">1</div>
+                                </div>
+                                <div class="calendar-day p-1">
+                                    <div class="text-xs">2</div>
+                                </div>
+                                <div class="calendar-day p-1">
+                                    <div class="text-xs">3</div>
+                                </div>
+                                <div class="calendar-day p-1">
+                                    <div class="text-xs">4</div>
+                                </div>
+                            </div>
+                            
+                            <!-- Legend -->
+                            <div class="flex flex-wrap gap-4 mt-4 text-sm">
+                                <div class="flex items-center space-x-2">
+                                    <div class="w-3 h-3 bg-teal-500 rounded-full"></div>
+                                    <span class="text-gray-600">Meeting Rooms</span>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <div class="w-3 h-3 bg-blue-500 rounded-full"></div>
+                                    <span class="text-gray-600">Zoom Accounts</span>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <div class="w-3 h-3 bg-purple-500 rounded-full"></div>
+                                    <span class="text-gray-600">Other Resources</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Reservation Modal -->
+    <div id="createReservationModal" class="modal fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="modal-content bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-screen overflow-y-auto">
+            <div class="p-6 border-b border-gray-200">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-lg font-semibold text-gray-800">Create Reservation</h3>
+                    <button id="closeReservationModal" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="p-6">
+                <form id="reservationForm">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Facility Type</label>
+                            <select id="facilityType" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500" required>
+                                <option value="">Select facility type</option>
+                                <option value="meeting-room">Meeting Room</option>
+                                <option value="zoom-account">Zoom Account</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Specific Facility</label>
+                            <select id="specificFacility" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500" required>
+                                <option value="">Select facility</option>
+                            </select>
+                        </div>
+                        
+                        <div class="lg:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Event Title</label>
+                            <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500" required>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Date</label>
+                            <input type="date" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500" required>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Start Time</label>
+                            <input type="time" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500" required>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">End Time</label>
+                            <input type="time" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500" required>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Number of Participants</label>
+                            <input type="number" min="1" max="100" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500" required>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Priority</label>
+                            <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+                                <option>Normal</option>
+                                <option>High</option>
+                                <option>Urgent</option>
+                            </select>
+                        </div>
+                        
+                        <div class="lg:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                            <textarea rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"></textarea>
+                        </div>
+                        
+                        <div class="lg:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Required Equipment</label>
+                            <div class="flex flex-wrap gap-2">
+                                <label class="flex items-center space-x-2">
+                                    <input type="checkbox" class="rounded border-gray-300 text-teal-600 focus:ring-teal-500">
+                                    <span class="text-sm text-gray-700">Projector</span>
+                                </label>
+                                <label class="flex items-center space-x-2">
+                                    <input type="checkbox" class="rounded border-gray-300 text-teal-600 focus:ring-teal-500">
+                                    <span class="text-sm text-gray-700">Whiteboard</span>
+                                </label>
+                                <label class="flex items-center space-x-2">
+                                    <input type="checkbox" class="rounded border-gray-300 text-teal-600 focus:ring-teal-500">
+                                    <span class="text-sm text-gray-700">Conference Phone</span>
+                                </label>
+                                <label class="flex items-center space-x-2">
+                                    <input type="checkbox" class="rounded border-gray-300 text-teal-600 focus:ring-teal-500">
+                                    <span class="text-sm text-gray-700">Video Conferencing</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-end space-x-3 mt-6">
+                        <button type="button" id="cancelReservationBtn" class="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                            Cancel
+                        </button>
+                        <button type="submit" class="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors">
+                            Create Reservation
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Bottom Navigation -->
+    <div class="lg:hidden mobile-nav fixed left-0 right-0 bg-white border-t border-gray-200 px-4 py-2">
+        <div class="flex justify-around">
+            <a href="index.html" class="flex flex-col items-center py-2 text-gray-500">
+                <i class="fas fa-tachometer-alt text-lg"></i>
+                <span class="text-xs mt-1">Dashboard</span>
+            </a>
+            <a href="office-updates.html" class="flex flex-col items-center py-2 text-gray-500">
+                <i class="fas fa-newspaper text-lg"></i>
+                <span class="text-xs mt-1">Updates</span>
+            </a>
+            <a href="employee-hub.html" class="flex flex-col items-center py-2 text-gray-500">
+                <i class="fas fa-users text-lg"></i>
+                <span class="text-xs mt-1">Hub</span>
+            </a>
+            <a href="program-calendar.html" class="flex flex-col items-center py-2 text-gray-500">
+                <i class="fas fa-calendar text-lg"></i>
+                <span class="text-xs mt-1">Calendar</span>
+            </a>
+            <a href="shared-facilities.html" class="flex flex-col items-center py-2 text-gray-800">
+                <i class="fas fa-building text-lg"></i>
+                <span class="text-xs mt-1">Facilities</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Add bottom padding for mobile navigation -->
+    <div class="lg:hidden h-20"></div>
+
+    <script src="main.js"></script>
+    <script>
+        // Shared Facilities specific functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            // Tab switching
+            const tabButtons = document.querySelectorAll('.tab-button');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const targetTab = button.dataset.tab;
+                    
+                    // Update active tab
+                    tabButtons.forEach(btn => btn.classList.remove('active'));
+                    tabContents.forEach(content => content.classList.remove('active'));
+                    
+                    button.classList.add('active');
+                    document.getElementById(targetTab).classList.add('active');
+                    
+                    // Animate tab transition
+                    anime({
+                        targets: `#${targetTab}`,
+                        opacity: [0, 1],
+                        translateY: [20, 0],
+                        duration: 300,
+                        easing: 'easeOutQuart'
+                    });
+                });
+            });
+
+            // Calendar navigation
+            const prevCalendarMonth = document.getElementById('prevCalendarMonth');
+            const nextCalendarMonth = document.getElementById('nextCalendarMonth');
+            const calendarMonth = document.getElementById('calendarMonth');
+
+            let currentCalendarDate = new Date();
+
+            prevCalendarMonth.addEventListener('click', () => {
+                currentCalendarDate.setMonth(currentCalendarDate.getMonth() - 1);
+                updateCalendarMonthDisplay();
+            });
+
+            nextCalendarMonth.addEventListener('click', () => {
+                currentCalendarDate.setMonth(currentCalendarDate.getMonth() + 1);
+                updateCalendarMonthDisplay();
+            });
+
+            function updateCalendarMonthDisplay() {
+                const monthNames = ["January", "February", "March", "April", "May", "June",
+                    "July", "August", "September", "October", "November", "December"];
+                calendarMonth.textContent = `${monthNames[currentCalendarDate.getMonth()]} ${currentCalendarDate.getFullYear()}`;
+            }
+
+            // Modal functionality
+            const createReservationBtn = document.getElementById('createReservationBtn');
+            const createReservationModal = document.getElementById('createReservationModal');
+            const closeReservationModal = document.getElementById('closeReservationModal');
+            const cancelReservationBtn = document.getElementById('cancelReservationBtn');
+            const facilityType = document.getElementById('facilityType');
+            const specificFacility = document.getElementById('specificFacility');
+
+            createReservationBtn.addEventListener('click', () => {
+                createReservationModal.classList.remove('hidden');
+                createReservationModal.classList.add('flex');
+                
+                anime({
+                    targets: createReservationModal.querySelector('.modal-content'),
+                    scale: [0.8, 1],
+                    opacity: [0, 1],
+                    duration: 300,
+                    easing: 'easeOutBack'
+                });
+            });
+
+            [closeReservationModal, cancelReservationBtn].forEach(btn => {
+                btn.addEventListener('click', () => {
+                    anime({
+                        targets: createReservationModal.querySelector('.modal-content'),
+                        scale: [1, 0.8],
+                        opacity: [1, 0],
+                        duration: 200,
+                        easing: 'easeInQuart',
+                        complete: () => {
+                            createReservationModal.classList.add('hidden');
+                            createReservationModal.classList.remove('flex');
+                        }
+                    });
+                });
+            });
+
+            // Dynamic facility selection
+            facilityType.addEventListener('change', (e) => {
+                const type = e.target.value;
+                const facilities = {
+                    'meeting-room': [
+                        { value: 'conf-room-1', text: 'Conference Room 1' },
+                        { value: 'conf-room-2', text: 'Conference Room 2' },
+                        { value: 'brainstorm-room', text: 'Brainstorm Room' },
+                        { value: 'exec-boardroom', text: 'Executive Boardroom' }
+                    ],
+                    'zoom-account': [
+                        { value: 'zoom-pro-1', text: 'Zoom Pro Account 1' },
+                        { value: 'zoom-pro-2', text: 'Zoom Pro Account 2' }
+                    ]
+                };
+
+                specificFacility.innerHTML = '<option value="">Select facility</option>';
+                
+                if (facilities[type]) {
+                    facilities[type].forEach(facility => {
+                        const option = document.createElement('option');
+                        option.value = facility.value;
+                        option.textContent = facility.text;
+                        specificFacility.appendChild(option);
+                    });
+                }
+            });
+
+            // Form submission
+            const reservationForm = document.getElementById('reservationForm');
+            reservationForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                
+                // Show success notification
+                if (window.wagPortal) {
+                    window.wagPortal.showNotification('Reservation created successfully!', 'success');
+                }
+                
+                // Close modal and reset form
+                createReservationModal.classList.add('hidden');
+                createReservationModal.classList.remove('flex');
+                reservationForm.reset();
+            });
+
+            // Facility card interactions
+            document.querySelectorAll('.facility-card button').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    
+                    const action = button.textContent.trim();
+                    const card = button.closest('.facility-card');
+                    const title = card.querySelector('h3').textContent;
+                    
+                    // Animate button click
+                    anime({
+                        targets: button,
+                        scale: [1, 0.95, 1],
+                        duration: 200,
+                        easing: 'easeInOutQuad'
+                    });
+                    
+                    // Show appropriate notification
+                    if (action.includes('Book') || action.includes('Reserve')) {
+                        if (window.wagPortal) {
+                            window.wagPortal.showNotification(`Booking ${title}...`, 'info');
+                        }
+                    } else {
+                        if (window.wagPortal) {
+                            window.wagPortal.showNotification(`Viewing ${title} details`, 'info');
+                        }
+                    }
+                });
+            });
+
+            // Calendar day interactions
+            document.querySelectorAll('.calendar-day').forEach(day => {
+                day.addEventListener('click', () => {
+                    // Remove previous selection
+                    document.querySelectorAll('.calendar-day').forEach(d => d.classList.remove('selected'));
+                    
+                    // Add selection to clicked day
+                    day.classList.add('selected');
+                    
+                    // Animate selection
+                    anime({
+                        targets: day,
+                        scale: [1, 0.95, 1],
+                        duration: 200,
+                        easing: 'easeInOutQuad'
+                    });
+                    
+                    const dayNumber = day.querySelector('.text-xs').textContent;
+                    if (window.wagPortal) {
+                        window.wagPortal.showNotification(`Selected December ${dayNumber}, 2024`, 'info');
+                    }
+                });
+            });
+
+            // Animate facility cards on load
+            anime({
+                targets: '.facility-card',
+                translateY: [30, 0],
+                opacity: [0, 1],
+                delay: anime.stagger(100),
+                duration: 600,
+                easing: 'easeOutQuart'
+            });
+
+            // Animate calendar on load
+            anime({
+                targets: '.calendar-day',
+                scale: [0.8, 1],
+                opacity: [0, 1],
+                delay: anime.stagger(20),
+                duration: 400,
+                easing: 'easeOutBack'
+            });
+        });
+    </script>
+</body>
+</html>

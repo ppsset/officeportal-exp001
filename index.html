@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WAG Portal - MEP Design Office</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        .sidebar-collapsed { transform: translateX(-100%); }
+        .sidebar-expanded { transform: translateX(0); }
+        .dashboard-card { transition: all 0.3s ease; }
+        .dashboard-card:hover { transform: translateY(-4px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        .status-badge { animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+        .mobile-nav { bottom: 0; z-index: 50; }
+        .hero-bg { background: linear-gradient(135deg, #fafafa 0%, #f7fafc 100%); }
+        .text-gradient { background: linear-gradient(135deg, #2D3748, #4A5568); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 overflow-x-hidden">
+    
+    <!-- Sidebar Navigation -->
+    <div id="sidebar" class="fixed left-0 top-0 h-full w-64 bg-white shadow-lg z-40 transition-transform duration-300 sidebar-expanded">
+        <div class="p-6 border-b border-gray-200">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-gray-700 to-gray-900 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-building text-white text-lg"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold text-gray-800">WAG Portal</h1>
+                        <p class="text-xs text-gray-500">MEP Design Office</p>
+                    </div>
+                </div>
+                <button id="sidebarToggle" class="lg:hidden text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+        </div>
+        
+        <nav class="p-4">
+            <ul class="space-y-2">
+                <li>
+                    <a href="index.html" class="flex items-center space-x-3 px-4 py-3 bg-gray-100 text-gray-800 rounded-lg font-medium">
+                        <i class="fas fa-tachometer-alt w-5"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="office-updates.html" class="flex items-center space-x-3 px-4 py-3 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+                        <i class="fas fa-newspaper w-5"></i>
+                        <span>Office Updates</span>
+                        <span class="ml-auto bg-orange-100 text-orange-600 text-xs px-2 py-1 rounded-full">3</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="employee-hub.html" class="flex items-center space-x-3 px-4 py-3 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+                        <i class="fas fa-users w-5"></i>
+                        <span>Employee Hub</span>
+                        <span class="ml-auto bg-blue-100 text-blue-600 text-xs px-2 py-1 rounded-full">5</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="program-calendar.html" class="flex items-center space-x-3 px-4 py-3 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+                        <i class="fas fa-calendar-alt w-5"></i>
+                        <span>Program Calendar</span>
+                        <span class="ml-auto bg-green-100 text-green-600 text-xs px-2 py-1 rounded-full">2</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="tech-knowledge.html" class="flex items-center space-x-3 px-4 py-3 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+                        <i class="fas fa-book w-5"></i>
+                        <span>Tech Knowledge</span>
+                        <span class="ml-auto bg-purple-100 text-purple-600 text-xs px-2 py-1 rounded-full">7</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="shared-facilities.html" class="flex items-center space-x-3 px-4 py-3 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+                        <i class="fas fa-building w-5"></i>
+                        <span>Shared Facilities</span>
+                        <span class="ml-auto bg-teal-100 text-teal-600 text-xs px-2 py-1 rounded-full">4</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="wellbeing.html" class="flex items-center space-x-3 px-4 py-3 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+                        <i class="fas fa-heartbeat w-5"></i>
+                        <span>Wellbeing</span>
+                        <span class="ml-auto bg-red-100 text-red-600 text-xs px-2 py-1 rounded-full">Good</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+        
+        <div class="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200">
+            <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                <div class="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
+                    <i class="fas fa-user text-gray-600 text-sm"></i>
+                </div>
+                <div class="flex-1">
+                    <p class="text-sm font-medium text-gray-800">John Smith</p>
+                    <p class="text-xs text-gray-500">Senior Engineer</p>
+                </div>
+                <button class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-cog"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Header -->
+    <div class="lg:hidden fixed top-0 left-0 right-0 bg-white shadow-sm z-30 p-4">
+        <div class="flex items-center justify-between">
+            <button id="mobileSidebarToggle" class="text-gray-600 hover:text-gray-800">
+                <i class="fas fa-bars text-xl"></i>
+            </button>
+            <div class="flex items-center space-x-2">
+                <div class="w-8 h-8 bg-gradient-to-br from-gray-700 to-gray-900 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-building text-white text-sm"></i>
+                </div>
+                <span class="font-bold text-gray-800">WAG Portal</span>
+            </div>
+            <div class="w-8"></div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div id="mainContent" class="lg:ml-64 min-h-screen">
+        <!-- Desktop Header -->
+        <div class="hidden lg:block bg-white shadow-sm">
+            <div class="px-8 py-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-800">Dashboard</h2>
+                        <p class="text-gray-600 mt-1">Welcome back, John. Here's what's happening in your office.</p>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <button class="relative p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors">
+                            <i class="fas fa-bell text-xl"></i>
+                            <span class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">3</span>
+                        </button>
+                        <button class="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors">
+                            <i class="fas fa-search text-xl"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Hero Section -->
+        <div class="hero-bg px-4 lg:px-8 py-8 lg:py-12">
+            <div class="max-w-7xl mx-auto">
+                <div class="grid lg:grid-cols-2 gap-8 items-center">
+                    <div>
+                        <h1 class="text-3xl lg:text-4xl font-bold text-gradient mb-4">
+                            MEP Design Office Management
+                        </h1>
+                        <p class="text-gray-600 text-lg mb-6 leading-relaxed">
+                            Streamline your engineering office operations with integrated modules for collaboration, 
+                            resource management, and environmental monitoring.
+                        </p>
+                        <div class="flex flex-wrap gap-3">
+                            <button class="bg-gray-800 text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition-colors">
+                                <i class="fas fa-plus mr-2"></i>Quick Action
+                            </button>
+                            <button class="border border-gray-300 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-50 transition-colors">
+                                <i class="fas fa-chart-line mr-2"></i>View Analytics
+                            </button>
+                        </div>
+                    </div>
+                    <div class="hidden lg:block">
+                        <img src="resources/hero-office.png" alt="MEP Office Environment" class="w-full h-64 object-cover rounded-lg shadow-lg">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard Cards -->
+        <div class="px-4 lg:px-8 py-8">
+            <div class="max-w-7xl mx-auto">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    
+                    <!-- Office Updates Card -->
+                    <div class="dashboard-card bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-newspaper text-orange-600 text-xl"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-semibold text-gray-800">Office Updates</h3>
+                                    <p class="text-sm text-gray-500">News & Policies</p>
+                                </div>
+                            </div>
+                            <span class="status-badge bg-orange-100 text-orange-600 text-sm font-medium px-3 py-1 rounded-full">3 New</span>
+                        </div>
+                        <p class="text-gray-600 text-sm mb-4">Latest office announcements and policy changes</p>
+                        <div class="flex space-x-2">
+                            <button class="flex-1 bg-orange-50 text-orange-600 py-2 px-4 rounded-lg text-sm font-medium hover:bg-orange-100 transition-colors">
+                                View All
+                            </button>
+                            <button class="bg-gray-100 text-gray-600 py-2 px-4 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Employee Hub Card -->
+                    <div class="dashboard-card bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-users text-blue-600 text-xl"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-semibold text-gray-800">Employee Hub</h3>
+                                    <p class="text-sm text-gray-500">Requests & Support</p>
+                                </div>
+                            </div>
+                            <span class="status-badge bg-blue-100 text-blue-600 text-sm font-medium px-3 py-1 rounded-full">5 Pending</span>
+                        </div>
+                        <p class="text-gray-600 text-sm mb-4">Manage leave requests and service tickets</p>
+                        <div class="flex space-x-2">
+                            <button class="flex-1 bg-blue-50 text-blue-600 py-2 px-4 rounded-lg text-sm font-medium hover:bg-blue-100 transition-colors">
+                                Review
+                            </button>
+                            <button class="bg-gray-100 text-gray-600 py-2 px-4 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Program Calendar Card -->
+                    <div class="dashboard-card bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-calendar-alt text-green-600 text-xl"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-semibold text-gray-800">Program Calendar</h3>
+                                    <p class="text-sm text-gray-500">Events & Meetings</p>
+                                </div>
+                            </div>
+                            <span class="status-badge bg-green-100 text-green-600 text-sm font-medium px-3 py-1 rounded-full">2 Today</span>
+                        </div>
+                        <p class="text-gray-600 text-sm mb-4">Schedule and manage office events</p>
+                        <div class="flex space-x-2">
+                            <button class="flex-1 bg-green-50 text-green-600 py-2 px-4 rounded-lg text-sm font-medium hover:bg-green-100 transition-colors">
+                                View Calendar
+                            </button>
+                            <button class="bg-gray-100 text-gray-600 py-2 px-4 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Tech Knowledge Card -->
+                    <div class="dashboard-card bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-book text-purple-600 text-xl"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-semibold text-gray-800">Tech Knowledge</h3>
+                                    <p class="text-sm text-gray-500">MEP Resources</p>
+                                </div>
+                            </div>
+                            <span class="status-badge bg-purple-100 text-purple-600 text-sm font-medium px-3 py-1 rounded-full">7 New</span>
+                        </div>
+                        <p class="text-gray-600 text-sm mb-4">Technical documentation and best practices</p>
+                        <div class="flex space-x-2">
+                            <button class="flex-1 bg-purple-50 text-purple-600 py-2 px-4 rounded-lg text-sm font-medium hover:bg-purple-100 transition-colors">
+                                Browse
+                            </button>
+                            <button class="bg-gray-100 text-gray-600 py-2 px-4 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Shared Facilities Card -->
+                    <div class="dashboard-card bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-12 h-12 bg-teal-100 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-building text-teal-600 text-xl"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-semibold text-gray-800">Shared Facilities</h3>
+                                    <p class="text-sm text-gray-500">Rooms & Resources</p>
+                                </div>
+                            </div>
+                            <span class="status-badge bg-teal-100 text-teal-600 text-sm font-medium px-3 py-1 rounded-full">4 Reserved</span>
+                        </div>
+                        <p class="text-gray-600 text-sm mb-4">Meeting rooms and equipment booking</p>
+                        <div class="flex space-x-2">
+                            <button class="flex-1 bg-teal-50 text-teal-600 py-2 px-4 rounded-lg text-sm font-medium hover:bg-teal-100 transition-colors">
+                                Book Now
+                            </button>
+                            <button class="bg-gray-100 text-gray-600 py-2 px-4 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Wellbeing Card -->
+                    <div class="dashboard-card bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-heartbeat text-red-600 text-xl"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-semibold text-gray-800">Wellbeing</h3>
+                                    <p class="text-sm text-gray-500">Environment & Health</p>
+                                </div>
+                            </div>
+                            <span class="status-badge bg-green-100 text-green-600 text-sm font-medium px-3 py-1 rounded-full">Good</span>
+                        </div>
+                        <p class="text-gray-600 text-sm mb-4">Real-time environmental monitoring</p>
+                        <div class="flex space-x-2">
+                            <button class="flex-1 bg-red-50 text-red-600 py-2 px-4 rounded-lg text-sm font-medium hover:bg-red-100 transition-colors">
+                                Monitor
+                            </button>
+                            <button class="bg-gray-100 text-gray-600 py-2 px-4 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors">
+                                <i class="fas fa-chart-line"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="mt-12">
+                    <h3 class="text-xl font-bold text-gray-800 mb-6">Recent Activity</h3>
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+                        <div class="p-6 space-y-4">
+                            <div class="flex items-start space-x-4 p-4 hover:bg-gray-50 rounded-lg transition-colors">
+                                <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                    <i class="fas fa-calendar text-blue-600"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="text-sm font-medium text-gray-800">New meeting scheduled</p>
+                                    <p class="text-sm text-gray-500">Design Review Meeting - Conference Room 1 at 2:00 PM</p>
+                                    <p class="text-xs text-gray-400 mt-1">2 hours ago</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-start space-x-4 p-4 hover:bg-gray-50 rounded-lg transition-colors">
+                                <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                    <i class="fas fa-check text-green-600"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="text-sm font-medium text-gray-800">Leave request approved</p>
+                                    <p class="text-sm text-gray-500">Sarah Johnson's vacation request has been approved</p>
+                                    <p class="text-xs text-gray-400 mt-1">4 hours ago</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-start space-x-4 p-4 hover:bg-gray-50 rounded-lg transition-colors">
+                                <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                    <i class="fas fa-book text-purple-600"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="text-sm font-medium text-gray-800">New tech knowledge posted</p>
+                                    <p class="text-sm text-gray-500">HVAC System Optimization Guidelines added to knowledge base</p>
+                                    <p class="text-xs text-gray-400 mt-1">6 hours ago</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Bottom Navigation -->
+    <div class="lg:hidden mobile-nav fixed left-0 right-0 bg-white border-t border-gray-200 px-4 py-2">
+        <div class="flex justify-around">
+            <a href="index.html" class="flex flex-col items-center py-2 text-gray-800">
+                <i class="fas fa-tachometer-alt text-lg"></i>
+                <span class="text-xs mt-1">Dashboard</span>
+            </a>
+            <a href="office-updates.html" class="flex flex-col items-center py-2 text-gray-500">
+                <i class="fas fa-newspaper text-lg"></i>
+                <span class="text-xs mt-1">Updates</span>
+            </a>
+            <a href="employee-hub.html" class="flex flex-col items-center py-2 text-gray-500">
+                <i class="fas fa-users text-lg"></i>
+                <span class="text-xs mt-1">Hub</span>
+            </a>
+            <a href="program-calendar.html" class="flex flex-col items-center py-2 text-gray-500">
+                <i class="fas fa-calendar text-lg"></i>
+                <span class="text-xs mt-1">Calendar</span>
+            </a>
+            <a href="wellbeing.html" class="flex flex-col items-center py-2 text-gray-500">
+                <i class="fas fa-heartbeat text-lg"></i>
+                <span class="text-xs mt-1">Wellbeing</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Add bottom padding for mobile navigation -->
+    <div class="lg:hidden h-20"></div>
+
+    <script src="main.js"></script>
+</body>
+</html>
